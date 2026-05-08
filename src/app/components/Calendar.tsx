@@ -25,7 +25,9 @@ export default function Calendar() {
                 initialView={"dayGridMonth"}
                 dateClick={dateClick}
                 headerToolbar={{
-                    right: 'dayGridMonth,timeGridWeek,prev,next,today'
+                    right: 'dayGridMonth,timeGridWeek,prev,next,today',
+                    center: 'title',
+                    left: ''
                 }}
                 //theme system next and go through full calendar docs
                 eventContent={(info) => {
