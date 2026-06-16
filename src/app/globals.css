@@ -1,2 +1,51 @@
+/* Import Tailwind base styles */
 @import "tailwindcss";
 
+/* FullCalendar CSS variables */
+:root {
+  --fc-border-color: #a1a1a1;       /* grid border color */
+  --fc-today-bg-color: #F6FFDC;     /* today's cell color */
+}
+
+/* All day cells in the grid */
+.fc-daygrid-day {
+  background-color: #CFECF3;
+}
+
+/* Day of week header row (Sun, Mon, Tue...) */
+.fc th {
+  background-color: #F9B2D7;
+}
+
+/* Today's cell (overrides daygrid-day) */
+.fc-day-today {
+  background-color: #F6FFDC !important;
+}
+
+/* Days outside the current month (grayed out) */
+.fc-day-other {
+  background-color: #e0e0e0;
+}
+
+/* Page background behind the calendar */
+body {
+  background-color: #CFECF3;
+}
+
+/* Toolbar bar (where title and buttons sit) 
+.fc-toolbar {
+  background-color: #F9B2D7;
+  padding: 10px;
+} */
+
+/* Toolbar buttons (month, week, arrows, today) */
+.fc .fc-button {
+  background-color: #CFECF3;
+  border-color: #000000;
+  color: #000000;
+}
+
+/* Active/selected button (e.g. "month" when on month view) */
+.fc .fc-button-active {
+  background-color: #F6FFDC;
+}

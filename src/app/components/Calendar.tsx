@@ -6,20 +6,34 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 
 export default function Calendar() {
-    function dateClick(event) {
-        const title = prompt("Title of the Event");
-        const timeInput = prompt("Start and End Time (##:## - ##:##)");
-        const time = " Time: " + timeInput;
-        if (title && timeInput) event.view.calendar.addEvent({
-            title: title,
-            start: event.dateStr,
-            extendedProps: {
-                time: "Time: " + timeInput
-            }
+    async function dateClick(info: any) {
+        const date = info.dateStr; // the date the user clicked
+
+        const summary = prompt("Enter event title") ?? "";
+        const startTime = prompt("Enter start time (HH:MM)") ?? "";
+        const endTime = prompt("Enter end time (HH:MM)") ?? "";
+
+        const event = {
+            summary: summary,
+            start: { dateTime: `${date}T${startTime}:00-07:00` },
+            end: { dateTime: `${date}T${endTime}:00-07:00` },
+        };
+
+        const response = await fetch("/api/create-event", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(event),
         });
+
+        if (response.ok) {
+            alert("Event created successfully!");
+        } else {
+            alert("Failed to create event.");
+        }
     }
+    
     return (
-        <div>
+        <div style= {{ width: "100%", height: "100vh", padding: "20px", boxSizing: "border-box"}}>
             <FullCalendar
                 plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
                 initialView={"dayGridMonth"}
@@ -29,15 +43,7 @@ export default function Calendar() {
                     center: 'title',
                     left: ''
                 }}
-                //theme system next and go through full calendar docs
-                eventContent={(info) => {
-                    return (
-                        <div>
-                            <div>{info.event.title}</div>
-                            <div>{info.event.extendedProps.time}</div>
-                        </div>
-                    )
-                }}
+                
             />
         </div>
     )
