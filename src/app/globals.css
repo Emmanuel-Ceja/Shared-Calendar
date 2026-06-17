@@ -1,51 +1,66 @@
-/* Import Tailwind base styles */
+@import url('https://fonts.googleapis.com/css2?family=DynaPuff&display=swap');
 @import "tailwindcss";
 
-/* FullCalendar CSS variables */
 :root {
-  --fc-border-color: #a1a1a1;       /* grid border color */
-  --fc-today-bg-color: #F6FFDC;     /* today's cell color */
+  --fc-border-color: #a1a1a1;
+  --fc-today-bg-color: #F6FFDC;
 }
 
-/* All day cells in the grid */
+.fc {
+  font-family: 'DynaPuff', sans-serif;
+}
+
+.fc-daygrid-body table {
+  border-collapse: separate !important;
+  border-spacing: 4px !important;
+}
+
+.fc-scrollgrid {
+  border-left: none !important;
+}
+
 .fc-daygrid-day {
-  background-color: #CFECF3;
+  background-color: #F7F4D5;
+  color: #839958;
+  border: 1px solid #a1a1a1 !important;
+  border-radius: 8px !important;
+  overflow: hidden;
 }
 
-/* Day of week header row (Sun, Mon, Tue...) */
 .fc th {
-  background-color: #F9B2D7;
+  background-color: #0A3323;
+  color: #839958;
+  border: 1px solid #a1a1a1 !important;
+  border-radius: 8px !important;
 }
 
-/* Today's cell (overrides daygrid-day) */
 .fc-day-today {
-  background-color: #F6FFDC !important;
+  background-color: #F7F4D5 !important;
+  border-color: #839958 !important;
+  border-width: 3px !important;
 }
 
-/* Days outside the current month (grayed out) */
 .fc-day-other {
-  background-color: #e0e0e0;
+  background-color: #d8d8d8 !important;
 }
 
-/* Page background behind the calendar */
 body {
-  background-color: #CFECF3;
+  background-color: #fdfced;
 }
 
-/* Toolbar bar (where title and buttons sit) 
-.fc-toolbar {
-  background-color: #F9B2D7;
-  padding: 10px;
-} */
-
-/* Toolbar buttons (month, week, arrows, today) */
 .fc .fc-button {
-  background-color: #CFECF3;
+  background-color: #0A3323;
   border-color: #000000;
-  color: #000000;
+  color: #839958;
 }
 
-/* Active/selected button (e.g. "month" when on month view) */
 .fc .fc-button-active {
-  background-color: #F6FFDC;
+  background-color: #839958 !important;
+}
+
+.fc-col-header-cell,
+.fc-col-header,
+.fc-scrollgrid-section-header td,
+.fc-scrollgrid-section-header th {
+  border: none !important;
 }

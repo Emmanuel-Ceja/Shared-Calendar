@@ -17,7 +17,7 @@ export default function Home() {
 
   return (
     <div>
-      <button onClick={() => signOut()}>Sign Out</button>
+      <button className="border-2 border-[#0A3323] rounded-sm bg-[#0A3323] text-[#839958]" onClick={() => signOut()} >Sign Out</button>
       <Calendar />
     </div>
   );
