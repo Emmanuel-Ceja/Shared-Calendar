@@ -1,7 +1,7 @@
 "use client"
 import { useSession, signIn, signOut } from "next-auth/react";
 import { useState } from "react";
-import Calendar from "./components/Calendar";
+import Calendar from "@/components/Calendar";
 
 export default function Home() {
   const { data: session } = useSession();

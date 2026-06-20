@@ -4,9 +4,11 @@ import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
+import TimePickerModal from "@/components/TimePickerModal";
 
 export default function Calendar() {
   const [events, setEvents] = useState([]);
+  let [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     async function fetchEvents() {
@@ -23,7 +25,9 @@ export default function Calendar() {
   }, []);
 
   async function dateClick(info: any) {
-    const date = info.dateStr;
+    console.log("date clicked, isOpen should be true now");
+    setIsOpen(true);
+    /*const date = info.dateStr;
     const summary = prompt("Enter event title") ?? "";
     const startTime = prompt("Enter start time (HH:MM)") ?? "";
     const endTime = prompt("Enter end time (HH:MM)") ?? "";
@@ -45,7 +49,7 @@ export default function Calendar() {
       fetchEvents(); // refresh calendar
     } else {
       alert("Failed to create event.");
-    }
+    }*/
   }
 
   async function fetchEvents() {
@@ -73,6 +77,9 @@ export default function Calendar() {
           left: ''
         }}
       />
+      <TimePickerModal 
+        isOpen={isOpen}
+        setIsOpen={setIsOpen}/>
     </div>
   );
 }
