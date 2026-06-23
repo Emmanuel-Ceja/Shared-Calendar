@@ -5,10 +5,14 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import TimePickerModal from "@/components/TimePickerModal";
+import EventTitleModal from "./EventTitleModal";
 
 export default function Calendar() {
   const [events, setEvents] = useState([]);
   let [isOpen, setIsOpen] = useState(false);
+  const [clickedDate, setClickedDate] = useState("");
+  let [isOpenEventTitle, setIsOpenEventTitle] = useState(false);
+  const [eventTitle, setEventTitle] = useState("");
 
   useEffect(() => {
     async function fetchEvents() {
@@ -24,18 +28,13 @@ export default function Calendar() {
     fetchEvents();
   }, []);
 
-  async function dateClick(info: any) {
-    console.log("date clicked, isOpen should be true now");
-    setIsOpen(true);
-    /*const date = info.dateStr;
-    const summary = prompt("Enter event title") ?? "";
-    const startTime = prompt("Enter start time (HH:MM)") ?? "";
-    const endTime = prompt("Enter end time (HH:MM)") ?? "";
+  async function handleCreateEvent(startTime: string, endTime: string) {
+    if (!clickedDate) return;
 
     const event = {
-      summary,
-      start: { dateTime: `${date}T${startTime}:00-07:00` },
-      end: { dateTime: `${date}T${endTime}:00-07:00` },
+      summary: "New Event", // we'll improve this later
+      start: { dateTime: `${clickedDate}T${startTime}-07:00` },
+      end: { dateTime: `${clickedDate}T${endTime}-07:00` },
     };
 
     const response = await fetch("/api/create-event", {
@@ -46,10 +45,17 @@ export default function Calendar() {
 
     if (response.ok) {
       alert("Event created!");
-      fetchEvents(); // refresh calendar
+      fetchEvents();
+      setIsOpen(false);
     } else {
       alert("Failed to create event.");
-    }*/
+    }
+  }
+
+  async function dateClick(info: any) {
+    /*fix this ended here removed the opening of the timepickermodal*/
+    setIsOpenEventTitle(true);
+    setClickedDate(info.dateStr);
   }
 
   async function fetchEvents() {
@@ -77,9 +83,14 @@ export default function Calendar() {
           left: ''
         }}
       />
+      <EventTitleModal
+        isOpen={isOpenEventTitle}
+        setIsOpen={setIsOpenEventTitle}
+        onSubmit={setEventTitle}/>
       <TimePickerModal 
         isOpen={isOpen}
-        setIsOpen={setIsOpen}/>
+        setIsOpen={setIsOpen}
+        onSubmit={handleCreateEvent}/>
     </div>
   );
 }
