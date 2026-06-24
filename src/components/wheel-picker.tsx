@@ -19,7 +19,7 @@ function WheelPickerWrapper({
   return (
     <WheelPickerPrimitive.WheelPickerWrapper
       className={cn(
-        "w-56 rounded-lg border border-zinc-200 bg-white px-1 shadow-xs dark:border-zinc-700/80 dark:bg-zinc-900",
+        "w-56 rounded-lg border border-zinc-200 bg-[#fdfced] px-1 shadow-xs dark:border-zinc-700/80 dark:bg-zinc-900",
         "*:data-rwp:first:*:data-rwp-highlight-wrapper:rounded-s-md",
         "*:data-rwp:last:*:data-rwp-highlight-wrapper:rounded-e-md",
         "font-dynapuff",
@@ -42,7 +42,7 @@ function WheelPicker<T extends WheelPickerValue = string>({
           classNames?.optionItem
         ),
         highlightWrapper: cn(
-          "bg-zinc-100 text-zinc-950 dark:bg-zinc-800 dark:text-zinc-50",
+          "bg-[#fdfced] border-1 border-[#839958] text-zinc-950 dark:bg-zinc-800 dark:text-zinc-50",
           "data-rwp-focused:inset-ring-2 data-rwp-focused:inset-ring-zinc-300 dark:data-rwp-focused:inset-ring-zinc-600",
           classNames?.highlightWrapper
         ),

@@ -1,9 +1,7 @@
 "use client"
 import "@/components/Modal.css";
 import { WheelPicker, type WheelPickerOption, WheelPickerWrapper } from "@/components/wheel-picker";
-import { send } from "process";
 import { useState } from "react";
-import { start } from "repl";
 
 const hours: WheelPickerOption[] = [
     { label: "1", value: "01" },
@@ -20,6 +18,7 @@ const hours: WheelPickerOption[] = [
     { label: "12", value: "12" },
 ]
 const minutes : WheelPickerOption[] = [
+    { label: "00", value: "00" },
     { label: "01", value: "01" },
     { label: "02", value: "02" },
     { label: "03", value: "03" },
@@ -85,9 +84,9 @@ const meridiem : WheelPickerOption[] = [
     { label: "PM", value: "PM" },
 ]
 
-export default function EndTimePickerModal({ isOpen, setIsOpen, startTime, onSubmit} : {isOpen: boolean; setIsOpen: (value: boolean) => void; onSubmit: (start: string, end: string) => void; startTime: string}) {
+export default function EndTimePickerModal({ isOpen, setIsOpen, startTime, onSubmit, onCancel } : {isOpen: boolean; setIsOpen: (value: boolean) => void; onSubmit: (start: string, end: string) => void; startTime: string; onCancel: () => void}) {
     const [valueHours, setValueHours] = useState("01");
-    const [valueMinutes, setValueMinutes] = useState("01");
+    const [valueMinutes, setValueMinutes] = useState("00");
     const [valueMeridiem, setValueMeridiem] = useState("AM");
 
     const sendTime = () => {
@@ -104,19 +103,20 @@ export default function EndTimePickerModal({ isOpen, setIsOpen, startTime, onSub
         return endTime;
     }
 
-    const toggleModal = () => {
-        setIsOpen(!isOpen)
+    const cancel = () => {
+        setIsOpen(false);
+        onCancel();
     }
+
     const submit = () => {
         onSubmit(startTime, sendTime());
-        toggleModal();
-
+        setIsOpen(false);
     }
     return (
-<>
+        <>
         {isOpen && (
             <div className="modal">
-                <div className="overlay" onClick={toggleModal}></div>
+                <div className="overlay" onClick={cancel}></div>
                 <div className="modal-content">
                     <WheelPickerWrapper>
                         <WheelPicker options={hours} value={valueHours} onValueChange={setValueHours}/>
@@ -124,7 +124,7 @@ export default function EndTimePickerModal({ isOpen, setIsOpen, startTime, onSub
                         <WheelPicker options={meridiem} value={valueMeridiem} onValueChange={setValueMeridiem}/>
                     </WheelPickerWrapper>
                     <div className="flex items-center justify-between pt-2">
-                        <button className="border-2 border-[#0A3323] rounded-sm bg-[#0A3323] text-[#839958] font-dynapuff" onClick={toggleModal}>Cancel</button>
+                        <button className="border-2 border-[#0A3323] rounded-sm bg-[#0A3323] text-[#839958] font-dynapuff" onClick={cancel}>Cancel</button>
                         <button className="border-2 border-[#0A3323] rounded-sm bg-[#0A3323] text-[#839958] font-dynapuff" onClick={submit}>Submit</button>
                     </div>
                 </div>

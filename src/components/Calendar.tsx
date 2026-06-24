@@ -15,16 +15,6 @@ export default function Calendar() {
   const [eventTitle, setEventTitle] = useState("");
 
   useEffect(() => {
-    async function fetchEvents() {
-      const response = await fetch("/api/get-events");
-      const data = await response.json();
-      const formatted = data.map((e: any) => ({
-        title: e.title,
-        start: e.start_time,
-        end: e.end_time,
-      }));
-      setEvents(formatted);
-    }
     fetchEvents();
   }, []);
 
@@ -32,7 +22,7 @@ export default function Calendar() {
     if (!clickedDate) return;
 
     const event = {
-      summary: eventTitle,
+      summary: eventTitle || "New Event",
       start: { dateTime: `${clickedDate}T${startTime}-07:00` },
       end: { dateTime: `${clickedDate}T${endTime}-07:00` },
     };
@@ -46,15 +36,30 @@ export default function Calendar() {
     if (response.ok) {
       alert("Event created!");
       fetchEvents();
-      setIsOpen(false);
+      resetEventState();
     } else {
       alert("Failed to create event.");
     }
   }
 
+  // Clears out any leftover data from a cancelled or completed attempt
+  // so the next time the user opens the flow, it starts fresh.
+  function resetEventState() {
+    setClickedDate("");
+    setEventTitle("");
+    setIsOpen(false);
+    setIsOpenEventTitle(false);
+  }
+
   async function dateClick(info: any) {
     setIsOpenEventTitle(true);
-    setClickedDate(info.dateStr);
+    // In month view, info.dateStr is just "YYYY-MM-DD".
+    // In week/time-grid view, info.dateStr already includes a time
+    // and offset (e.g. "2026-06-23T01:30:00-07:00"). Splitting on "T"
+    // keeps only the date portion either way, so it's always a clean
+    // "YYYY-MM-DD" before startTime/endTime get appended later.
+    const justTheDate = info.dateStr.split("T")[0];
+    setClickedDate(justTheDate);
   }
 
   async function fetchEvents() {
@@ -86,11 +91,13 @@ export default function Calendar() {
         isOpen={isOpenEventTitle}
         setIsOpen={setIsOpenEventTitle}
         onSubmit={setEventTitle}
-        onContinue={() => setIsOpen(true)}/>
+        onContinue={() => setIsOpen(true)}
+        onCancel={resetEventState}/>
       <TimePickerModal 
         isOpen={isOpen}
         setIsOpen={setIsOpen}
-        onSubmit={handleCreateEvent}/>
+        onSubmit={handleCreateEvent}
+        onCancel={resetEventState}/>
     </div>
   );
 }

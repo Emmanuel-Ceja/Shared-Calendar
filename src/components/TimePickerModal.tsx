@@ -1,10 +1,8 @@
 "use client"
 import "@/components/Modal.css";
 import { WheelPicker, type WheelPickerOption, WheelPickerWrapper } from "@/components/wheel-picker";
-import { send } from "process";
 import { useState } from "react";
 import EndTimePickerModal from "./EndTimePickerModal";
-import { time } from "console";
 
 const hours: WheelPickerOption[] = [
     { label: "1", value: "01" },
@@ -21,6 +19,7 @@ const hours: WheelPickerOption[] = [
     { label: "12", value: "12" },
 ]
 const minutes : WheelPickerOption[] = [
+    { label: "00", value: "00" },
     { label: "01", value: "01" },
     { label: "02", value: "02" },
     { label: "03", value: "03" },
@@ -86,16 +85,12 @@ const meridiem : WheelPickerOption[] = [
     { label: "PM", value: "PM" },
 ]
 
-export default function TimePickerModal({ isOpen, setIsOpen, onSubmit} : {isOpen: boolean; setIsOpen: (value: boolean) => void, onSubmit: (start: string, end: string) => void}) {
+export default function TimePickerModal({ isOpen, setIsOpen, onSubmit, onCancel } : {isOpen: boolean; setIsOpen: (value: boolean) => void; onSubmit: (start: string, end: string) => void; onCancel: () => void}) {
     const [valueHours, setValueHours] = useState("01");
-    const [valueMinutes, setValueMinutes] = useState("01");
+    const [valueMinutes, setValueMinutes] = useState("00");
     const [valueMeridiem, setValueMeridiem] = useState("AM");
     let [isOpenEnd, setIsOpenEnd] = useState(false);
     const [startTimeString, setStartTimeString] = useState("");
-
-    const toggleModal = () => {
-        setIsOpen(!isOpen)
-    }
 
     const sendTime = () => {
         let newHour = valueHours;
@@ -111,37 +106,49 @@ export default function TimePickerModal({ isOpen, setIsOpen, onSubmit} : {isOpen
         return time;
     }
 
+    const cancel = () => {
+        setIsOpenEnd(false);
+        setIsOpen(false);
+        onCancel();
+    }
+
     const toggleModalEnd = () => {
-        setIsOpenEnd(!isOpenEnd);
+        setIsOpenEnd(true);
+        setIsOpen(false);
         setStartTimeString(sendTime());
     }
+
+    const cancelFromEnd = () => {
+        setIsOpenEnd(false);
+        cancel();
+    }
+
     return (
         <>
         {isOpen && (
             <div className="modal">
-                <div className="overlay" onClick={toggleModal}></div>
+                <div className="overlay" onClick={cancel}></div>
                 <div className="modal-content">
-                    
                     <WheelPickerWrapper>
                         <WheelPicker options={hours} value={valueHours} onValueChange={setValueHours}/>
                         <WheelPicker options={minutes} value={valueMinutes} onValueChange={setValueMinutes}/>
                         <WheelPicker options={meridiem} value={valueMeridiem} onValueChange={setValueMeridiem}/>
                     </WheelPickerWrapper>
                     <div className="flex items-center justify-between pt-2">
-                        <button className="border-2 border-[#0A3323] rounded-sm bg-[#0A3323] text-[#839958] font-dynapuff" onClick={toggleModal}>Cancel</button>
+                        <button className="border-2 border-[#0A3323] rounded-sm bg-[#0A3323] text-[#839958] font-dynapuff" onClick={cancel}>Cancel</button>
                         <button className="border-2 border-[#0A3323] rounded-sm bg-[#0A3323] text-[#839958] font-dynapuff" onClick={toggleModalEnd}>Continue</button>
-                        {isOpenEnd && (
-                            <EndTimePickerModal
-                                isOpen={isOpenEnd}
-                                setIsOpen={setIsOpenEnd}
-                                startTime={startTimeString}
-                                onSubmit={onSubmit}/>
-                        )}
                     </div>
                 </div>
             </div>
         )}
-        
+        {isOpenEnd && (
+            <EndTimePickerModal
+                isOpen={isOpenEnd}
+                setIsOpen={setIsOpenEnd}
+                startTime={startTimeString}
+                onSubmit={onSubmit}
+                onCancel={cancelFromEnd}/>
+        )}
         </>
     )
 }

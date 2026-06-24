@@ -55,12 +55,20 @@
   border-left: none !important;
 }
 
+.fc-scrollgrid-section {
+  background-color: #F7F4D5 !important;
+}
+
 .fc-daygrid-day {
   background-color: #F7F4D5;
   color: #839958;
   border: 1px solid #a1a1a1 !important;
   border-radius: 8px !important;
   overflow: hidden;
+}
+
+.fc-timegrid-body {
+  background-color: #F7F4D5 !important;
 }
 
 .fc th {

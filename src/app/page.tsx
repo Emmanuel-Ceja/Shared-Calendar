@@ -34,14 +34,15 @@ export default function Home() {
   return (
     <div>
       <div style={{ padding: "10px", display: "flex", gap: "10px", alignItems: "center" }}>
-        <button className="border-2 min-w-[75px] border-[#0A3323] rounded-sm bg-[#0A3323] text-[#839958]" onClick={() => signOut()}>Sign Out</button> 
+        <button className="border-2 min-w-[75px] border-[#0A3323] rounded-sm bg-[#0A3323] text-[#839958] font-dynapuff" onClick={() => signOut()}>Sign Out</button> 
         <input
+          className="font-dynapuff"
           type="email"
           placeholder="Enter partner's email to link"
           value={linkEmail}
           onChange={(e) => setLinkEmail(e.target.value)}
         />
-        <button className="border-2 border-[#0A3323] rounded-sm bg-[#0A3323] text-[#839958]" onClick={linkUser}>Link User</button>
+        <button className="border-2 border-[#0A3323] rounded-sm bg-[#0A3323] text-[#839958] font-dynapuff" onClick={linkUser}>Link User</button>
       </div>
       <Calendar />
     </div>
