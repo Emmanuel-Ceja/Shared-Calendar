@@ -1,23 +1,54 @@
 "use client"
-import { useSession, signIn, signOut } from "next-auth/react";
-import { useState } from "react";
+import { useSession, signIn } from "next-auth/react";
+import { useState, useEffect } from "react";
 import Calendar from "@/components/Calendar";
+import MenuBar from "@/components/MenuBar";
+import LinkModal from "@/components/LinkModal";
 
 export default function Home() {
   const { data: session } = useSession();
-  const [linkEmail, setLinkEmail] = useState("");
+  const [isLinked, setIsLinked] = useState(false);
+  const [partnerEmail, setPartnerEmail] = useState("");
+  const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
 
-  async function linkUser() {
+  useEffect(() => {
+    if (session) {
+      checkLinkStatus();
+    }
+  }, [session]);
+
+  async function checkLinkStatus() {
+    const response = await fetch("/api/check-link");
+    const data = await response.json();
+    setIsLinked(data.linked ?? false);
+    setPartnerEmail(data.partnerEmail ?? "");
+  }
+
+  async function linkUser(email: string) {
     const response = await fetch("/api/link-user", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ linkedEmail: linkEmail }),
+      body: JSON.stringify({ linkedEmail: email }),
     });
 
     if (response.ok) {
-      alert(`Successfully linked with ${linkEmail}!`);
+      alert(`Successfully linked with ${email}!`);
+      checkLinkStatus();
     } else {
       alert("Failed to link user.");
+    }
+  }
+
+  async function unlinkUser() {
+    const response = await fetch("/api/unlink", {
+      method: "POST",
+    });
+
+    if (response.ok) {
+      alert("Unlinked.");
+      checkLinkStatus();
+    } else {
+      alert("Failed to unlink.");
     }
   }
 
@@ -33,17 +64,18 @@ export default function Home() {
 
   return (
     <div>
-      <div style={{ padding: "10px", display: "flex", gap: "10px", alignItems: "center" }}>
-        <button className="border-2 min-w-[75px] border-[#0A3323] rounded-sm bg-[#0A3323] text-[#839958] font-dynapuff" onClick={() => signOut()}>Sign Out</button> 
-        <input
-          className="font-dynapuff"
-          type="email"
-          placeholder="Enter partner's email to link"
-          value={linkEmail}
-          onChange={(e) => setLinkEmail(e.target.value)}
-        />
-        <button className="border-2 border-[#0A3323] rounded-sm bg-[#0A3323] text-[#839958] font-dynapuff" onClick={linkUser}>Link User</button>
+      <div style={{ padding: "10px" }}>
+        <MenuBar
+          isLinked={isLinked}
+          onOpenLinkModal={() => setIsLinkModalOpen(true)}/>
       </div>
+      <LinkModal
+        isOpen={isLinkModalOpen}
+        setIsOpen={setIsLinkModalOpen}
+        isLinked={isLinked}
+        partnerEmail={partnerEmail}
+        onLink={linkUser}
+        onUnlink={unlinkUser}/>
       <Calendar />
     </div>
   );

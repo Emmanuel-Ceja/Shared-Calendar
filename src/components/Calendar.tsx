@@ -1,30 +1,41 @@
 "use client"
 import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import TimePickerModal from "@/components/TimePickerModal";
 import EventTitleModal from "./EventTitleModal";
+import EventDetailModal from "./EventDetailModal";
+
+// Hardcoded since this app is just for two specific people, not a
+// general audience -- no need for a database column to track this.
+const MY_EMAIL = process.env.NEXT_PUBLIC_MY_EMAIL;
+const HER_EMAIL = process.env.NEXT_PUBLIC_HER_EMAIL;
 
 export default function Calendar() {
+  const { data: session } = useSession();
   const [events, setEvents] = useState([]);
   let [isOpen, setIsOpen] = useState(false);
   const [clickedDate, setClickedDate] = useState("");
   let [isOpenEventTitle, setIsOpenEventTitle] = useState(false);
   const [eventTitle, setEventTitle] = useState("");
+  let [isOpenDetail, setIsOpenDetail] = useState(false);
+  const [clickedEvent, setClickedEvent] = useState("");
 
   useEffect(() => {
     fetchEvents();
   }, []);
 
-  async function handleCreateEvent(startTime: string, endTime: string) {
+  async function handleCreateEvent(startTime: string, endTime: string, isDate: boolean) {
     if (!clickedDate) return;
 
     const event = {
       summary: eventTitle || "New Event",
       start: { dateTime: `${clickedDate}T${startTime}-07:00` },
       end: { dateTime: `${clickedDate}T${endTime}-07:00` },
+      is_date_night: isDate,
     };
 
     const response = await fetch("/api/create-event", {
@@ -42,7 +53,7 @@ export default function Calendar() {
     }
   }
 
-  async function handleCreateAllDayEvent() {
+  async function handleCreateAllDayEvent(isDate: boolean) {
     if (!clickedDate) return;
 
     // Google's "end" date is exclusive for all-day events, so a single
@@ -55,6 +66,7 @@ export default function Calendar() {
       summary: eventTitle || "New Event",
       start: { date: clickedDate },
       end: { date: endDateString },
+      is_date_night: isDate,
     };
 
     const response = await fetch("/api/create-event", {
@@ -69,6 +81,26 @@ export default function Calendar() {
       resetEventState();
     } else {
       alert("Failed to create event.");
+    }
+  }
+
+  // Called from EventDetailModal's Delete button. Removes the event from
+  // Supabase (so it disappears for both linked partners) and from the
+  // signed-in user's own Google Calendar.
+  async function handleDeleteEvent(id: string, googleEventId: string | null) {
+    const response = await fetch("/api/delete-event", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, google_event_id: googleEventId }),
+    });
+
+    if (response.ok) {
+      alert("Event deleted!");
+      fetchEvents();
+      setIsOpenDetail(false);
+      setClickedEvent("");
+    } else {
+      alert("Failed to delete event.");
     }
   }
 
@@ -95,12 +127,41 @@ export default function Calendar() {
   async function fetchEvents() {
     const response = await fetch("/api/get-events");
     const data = await response.json();
-    const formatted = data.map((e: any) => ({
-      title: e.title,
-      start: e.start_time,
-      end: e.end_time,
-    }));
+    const formatted = data.map((e: any) => {
+      // Curly braces (instead of parentheses) let us run this if/else
+      // BEFORE building and returning the final object below.
+      let color = "#888888"; // fallback, shouldn't normally happen
+      if (e.created_by === MY_EMAIL) {
+        color = "#3B82F6"; // blue
+      } else if (e.created_by === HER_EMAIL) {
+        color = "#EC4899"; // pink
+      }
+      // Date night overrides whoever created it -- always purple.
+      if (e.is_date_night) {
+        color = "#8B5CF6"; // purple
+      }
+
+      return {
+        title: e.title,
+        start: e.start_time,
+        end: e.end_time,
+        color: color,
+        // extendedProps lets us stash extra data on a FullCalendar event
+        // that isn't part of its built-in title/start/end. We need these
+        // two ids later so the Delete button knows what to delete.
+        extendedProps: {
+          id: e.id,
+          google_event_id: e.google_event_id,
+          created_by: e.created_by,
+        },
+      };
+    });
     setEvents(formatted);
+  }
+
+  async function eventClickDetail(info: any) {
+    setIsOpenDetail(true);
+    setClickedEvent(info.event);
   }
 
   return (
@@ -109,6 +170,7 @@ export default function Calendar() {
         plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
         initialView={"dayGridMonth"}
         dateClick={dateClick}
+        eventClick={eventClickDetail}
         events={events}
         height="100%"
         headerToolbar={{
@@ -117,6 +179,12 @@ export default function Calendar() {
           left: ''
         }}
       />
+      <EventDetailModal
+        isOpen={isOpenDetail}
+        setIsOpen={setIsOpenDetail}
+        event={clickedEvent}
+        onDelete={handleDeleteEvent}
+        currentUserEmail={session?.user?.email ?? ""}/>
       <EventTitleModal
         isOpen={isOpenEventTitle}
         setIsOpen={setIsOpenEventTitle}

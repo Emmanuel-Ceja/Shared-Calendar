@@ -12,34 +12,54 @@ export async function POST(req: NextRequest) {
 
   const event = await req.json();
 
-  // Save to Supabase
-  const { data, error } = await supabase.from("events").insert({
-    title: event.summary,
-    start_time: event.start.dateTime,
-    end_time: event.end.dateTime,
-    created_by: token.email,
-    linked_to: "",
-  });
+  const startValue = event.start.dateTime ?? event.start.date;
+  const endValue = event.end.dateTime ?? event.end.date;
 
-  console.log("Supabase data:", data);
-  console.log("Supabase error:", error);
+  // is_date_night isn't a real Google Calendar field, so pull it out
+  // before sending the rest of the object to Google's API.
+  const { is_date_night, ...googleEvent } = event;
 
-  // Save to Google Calendar
-  const auth = new google.auth.OAuth2(
-    process.env.GOOGLE_CLIENT_ID!,
-    process.env.GOOGLE_CLIENT_SECRET!,
-  );
+  // Save to Google Calendar FIRST so we have its event id to store
+  // alongside the Supabase row.
+  let googleEventId: string | null = null;
+  try {
+    const auth = new google.auth.OAuth2(
+      process.env.GOOGLE_CLIENT_ID!,
+      process.env.GOOGLE_CLIENT_SECRET!,
+    );
 
-  auth.setCredentials({
-    access_token: token.accessToken as string,
-  });
+    auth.setCredentials({
+      access_token: token.accessToken as string,
+    });
 
-  const calendar = google.calendar({ version: "v3", auth });
+    const calendar = google.calendar({ version: "v3", auth });
 
-  const response = await calendar.events.insert({
-    calendarId: "primary",
-    requestBody: event,
-  });
+    const response = await calendar.events.insert({
+      calendarId: "primary",
+      requestBody: googleEvent,
+    });
 
-  return NextResponse.json(response.data);
+    googleEventId = response.data.id ?? null;
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
+
+  const { data, error } = await supabase
+    .from("events")
+    .insert({
+      title: event.summary,
+      start_time: startValue,
+      end_time: endValue,
+      created_by: token.email,
+      google_event_id: googleEventId,
+      is_date_night: is_date_night ?? false,
+    })
+    .select()
+    .single();
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json(data);
 }

@@ -84,7 +84,7 @@ const meridiem : WheelPickerOption[] = [
     { label: "PM", value: "PM" },
 ]
 
-export default function EndTimePickerModal({ isOpen, setIsOpen, startTime, onSubmit, onCancel } : {isOpen: boolean; setIsOpen: (value: boolean) => void; onSubmit: (start: string, end: string) => void; startTime: string; onCancel: () => void}) {
+export default function EndTimePickerModal({ isOpen, setIsOpen, startTime, isDate, onSubmit, onCancel } : {isOpen: boolean; setIsOpen: (value: boolean) => void; onSubmit: (start: string, end: string, isDate: boolean) => void; startTime: string; isDate: boolean; onCancel: () => void}) {
     const [valueHours, setValueHours] = useState("01");
     const [valueMinutes, setValueMinutes] = useState("00");
     const [valueMeridiem, setValueMeridiem] = useState("AM");
@@ -109,7 +109,7 @@ export default function EndTimePickerModal({ isOpen, setIsOpen, startTime, onSub
     }
 
     const submit = () => {
-        onSubmit(startTime, sendTime());
+        onSubmit(startTime, sendTime(), isDate);
         setIsOpen(false);
     }
     return (

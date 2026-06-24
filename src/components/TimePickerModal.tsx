@@ -19,6 +19,7 @@ const hours: WheelPickerOption[] = [
     { label: "12", value: "12" },
 ]
 const minutes : WheelPickerOption[] = [
+    { label: "00", value: "00" },
     { label: "01", value: "01" },
     { label: "02", value: "02" },
     { label: "03", value: "03" },
@@ -84,13 +85,14 @@ const meridiem : WheelPickerOption[] = [
     { label: "PM", value: "PM" },
 ]
 
-export default function TimePickerModal({ isOpen, setIsOpen, onSubmit, onSubmitAllDay, onCancel } : {isOpen: boolean; setIsOpen: (value: boolean) => void; onSubmit: (start: string, end: string) => void; onSubmitAllDay: () => void; onCancel: () => void}) {
-    const [valueHours, setValueHours] = useState("1");
-    const [valueMinutes, setValueMinutes] = useState("1");
+export default function TimePickerModal({ isOpen, setIsOpen, onSubmit, onSubmitAllDay, onCancel } : {isOpen: boolean; setIsOpen: (value: boolean) => void; onSubmit: (start: string, end: string, isDate: boolean) => void; onSubmitAllDay: (isDate: boolean) => void; onCancel: () => void}) {
+    const [valueHours, setValueHours] = useState("01");
+    const [valueMinutes, setValueMinutes] = useState("00");
     const [valueMeridiem, setValueMeridiem] = useState("AM");
     let [isOpenEnd, setIsOpenEnd] = useState(false);
     const [startTimeString, setStartTimeString] = useState("");
     const [isAllDay, setIsAllDay] = useState(false);
+    const [isDate, setIsDate] = useState(false);
 
     const sendTime = () => {
         let newHour = valueHours;
@@ -112,6 +114,7 @@ export default function TimePickerModal({ isOpen, setIsOpen, onSubmit, onSubmitA
         setIsOpenEnd(false);
         setIsOpen(false);
         setIsAllDay(false);
+        setIsDate(false);
         onCancel();
     }
 
@@ -131,9 +134,10 @@ export default function TimePickerModal({ isOpen, setIsOpen, onSubmit, onSubmitA
     // When "All Day" is checked, there's no start/end time to collect,
     // so this skips EndTimePickerModal entirely and submits right away.
     const submitAllDay = () => {
-        onSubmitAllDay();
+        onSubmitAllDay(isDate);
         setIsOpen(false);
         setIsAllDay(false);
+        setIsDate(false);
     }
 
     return (
@@ -142,14 +146,24 @@ export default function TimePickerModal({ isOpen, setIsOpen, onSubmit, onSubmitA
             <div className="modal">
                 <div className="overlay" onClick={cancel}></div>
                 <div className="modal-content">
-                    <label className="flex items-center gap-2 font-dynapuff pb-2">
-                        <input
-                            type="checkbox"
-                            checked={isAllDay}
-                            onChange={(e) => setIsAllDay(e.target.checked)}
-                        />
-                        All Day
-                    </label>
+                    <div className="flex items-center gap-4 font-dynapuff pb-2">
+                        <label className="flex items-center gap-2">
+                            <input
+                                type="checkbox"
+                                checked={isAllDay}
+                                onChange={(e) => setIsAllDay(e.target.checked)}
+                            />
+                            All Day?
+                        </label>
+                        <label className="flex items-center gap-2">
+                            <input
+                                type="checkbox"
+                                checked={isDate}
+                                onChange={(e) => setIsDate(e.target.checked)}
+                            />
+                            Date?
+                        </label>
+                    </div>
                     {!isAllDay && (
                         <WheelPickerWrapper>
                             <WheelPicker options={hours} value={valueHours} onValueChange={setValueHours}/>
@@ -173,6 +187,7 @@ export default function TimePickerModal({ isOpen, setIsOpen, onSubmit, onSubmitA
                 isOpen={isOpenEnd}
                 setIsOpen={setIsOpenEnd}
                 startTime={startTimeString}
+                isDate={isDate}
                 onSubmit={onSubmit}
                 onCancel={cancelFromEnd}/>
         )}
