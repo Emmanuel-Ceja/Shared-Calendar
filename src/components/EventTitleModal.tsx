@@ -1,12 +1,8 @@
 "use client"
 import "@/components/Modal.css";
-import { WheelPicker, type WheelPickerOption, WheelPickerWrapper } from "@/components/wheel-picker";
-import { send } from "process";
 import { useState } from "react";
-import EndTimePickerModal from "./EndTimePickerModal";
-import { time } from "console";
 
-export default function EventTitleModal({isOpen, setIsOpen, onSubmit}: {isOpen: boolean; setIsOpen: (value: boolean) => void; onSubmit: (title: string) => void}) {
+export default function EventTitleModal({isOpen, setIsOpen, onSubmit, onContinue}: {isOpen: boolean; setIsOpen: (value: boolean) => void; onSubmit: (title: string) => void; onContinue: () => void}) {
     const [eventTitle, setEventTitle] = useState("");
     const toggleModal = () => {
         setIsOpen(!isOpen)
@@ -15,6 +11,7 @@ export default function EventTitleModal({isOpen, setIsOpen, onSubmit}: {isOpen: 
     const submit = () => {
         onSubmit(eventTitle);
         toggleModal();
+        onContinue();
     }
     return (
         <>

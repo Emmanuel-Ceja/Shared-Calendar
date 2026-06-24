@@ -32,7 +32,7 @@ export default function Calendar() {
     if (!clickedDate) return;
 
     const event = {
-      summary: "New Event", // we'll improve this later
+      summary: eventTitle,
       start: { dateTime: `${clickedDate}T${startTime}-07:00` },
       end: { dateTime: `${clickedDate}T${endTime}-07:00` },
     };
@@ -53,7 +53,6 @@ export default function Calendar() {
   }
 
   async function dateClick(info: any) {
-    /*fix this ended here removed the opening of the timepickermodal*/
     setIsOpenEventTitle(true);
     setClickedDate(info.dateStr);
   }
@@ -86,7 +85,8 @@ export default function Calendar() {
       <EventTitleModal
         isOpen={isOpenEventTitle}
         setIsOpen={setIsOpenEventTitle}
-        onSubmit={setEventTitle}/>
+        onSubmit={setEventTitle}
+        onContinue={() => setIsOpen(true)}/>
       <TimePickerModal 
         isOpen={isOpen}
         setIsOpen={setIsOpen}
