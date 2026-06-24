@@ -30,8 +30,8 @@ export default function EventTitleModal({isOpen, setIsOpen, onSubmit, onContinue
                         onChange={(e) => setEventTitle(e.target.value)}
                     />
                     <div className="flex justify-between pt-2">
-                        <button className="border-2 border-[#0A3323] rounded-sm bg-[#0A3323] text-[#839958] font-dynapuff" onClick={cancel}>Cancel</button>
-                        <button className="border-2 border-[#0A3323] rounded-sm bg-[#0A3323] text-[#839958] font-dynapuff" onClick={submit}>Continue</button>
+                        <button className="border-2 border-[#0A3323] rounded-sm bg-[#0A3323] text-[#839958] font-dynapuff hover:bg-[#839958] hover:text-[#0A3323]" onClick={cancel}>Cancel</button>
+                        <button className="border-2 border-[#0A3323] rounded-sm bg-[#0A3323] text-[#839958] font-dynapuff hover:bg-[#839958] hover:text-[#0A3323]" onClick={submit}>Continue</button>
                     </div>
 
                 </div>

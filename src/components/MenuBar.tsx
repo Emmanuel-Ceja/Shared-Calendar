@@ -12,7 +12,7 @@ export default function MenuBar({ isLinked, onOpenLinkModal } : { isLinked: bool
     return (
         <div className="relative font-dynapuff">
             <button
-                className="border-2 border-[#0A3323] rounded-sm bg-[#0A3323] text-[#839958] px-3 py-1"
+                className="border-2 border-[#0A3323] rounded-sm bg-[#0A3323] text-[#839958] px-3 py-1 hover:bg-[#839958] hover:text-[#0A3323]"
                 onClick={toggleMenu}
             >
                 ☰

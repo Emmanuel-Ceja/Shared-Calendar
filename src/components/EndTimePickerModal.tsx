@@ -124,8 +124,8 @@ export default function EndTimePickerModal({ isOpen, setIsOpen, startTime, isDat
                         <WheelPicker options={meridiem} value={valueMeridiem} onValueChange={setValueMeridiem}/>
                     </WheelPickerWrapper>
                     <div className="flex items-center justify-between pt-2">
-                        <button className="border-2 border-[#0A3323] rounded-sm bg-[#0A3323] text-[#839958] font-dynapuff" onClick={cancel}>Cancel</button>
-                        <button className="border-2 border-[#0A3323] rounded-sm bg-[#0A3323] text-[#839958] font-dynapuff" onClick={submit}>Submit</button>
+                        <button className="border-2 border-[#0A3323] rounded-sm bg-[#0A3323] text-[#839958] font-dynapuff hover:bg-[#839958] hover:text-[#0A3323]" onClick={cancel}>Cancel</button>
+                        <button className="border-2 border-[#0A3323] rounded-sm bg-[#0A3323] text-[#839958] font-dynapuff hover:bg-[#839958] hover:text-[#0A3323]" onClick={submit}>Submit</button>
                     </div>
                 </div>
             </div>
