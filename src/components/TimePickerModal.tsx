@@ -19,7 +19,6 @@ const hours: WheelPickerOption[] = [
     { label: "12", value: "12" },
 ]
 const minutes : WheelPickerOption[] = [
-    { label: "00", value: "00" },
     { label: "01", value: "01" },
     { label: "02", value: "02" },
     { label: "03", value: "03" },
@@ -85,12 +84,13 @@ const meridiem : WheelPickerOption[] = [
     { label: "PM", value: "PM" },
 ]
 
-export default function TimePickerModal({ isOpen, setIsOpen, onSubmit, onCancel } : {isOpen: boolean; setIsOpen: (value: boolean) => void; onSubmit: (start: string, end: string) => void; onCancel: () => void}) {
-    const [valueHours, setValueHours] = useState("01");
-    const [valueMinutes, setValueMinutes] = useState("00");
+export default function TimePickerModal({ isOpen, setIsOpen, onSubmit, onSubmitAllDay, onCancel } : {isOpen: boolean; setIsOpen: (value: boolean) => void; onSubmit: (start: string, end: string) => void; onSubmitAllDay: () => void; onCancel: () => void}) {
+    const [valueHours, setValueHours] = useState("1");
+    const [valueMinutes, setValueMinutes] = useState("1");
     const [valueMeridiem, setValueMeridiem] = useState("AM");
     let [isOpenEnd, setIsOpenEnd] = useState(false);
     const [startTimeString, setStartTimeString] = useState("");
+    const [isAllDay, setIsAllDay] = useState(false);
 
     const sendTime = () => {
         let newHour = valueHours;
@@ -106,9 +106,12 @@ export default function TimePickerModal({ isOpen, setIsOpen, onSubmit, onCancel 
         return time;
     }
 
+    // Cancel here must also make sure the nested EndTimePickerModal
+    // can't stay open or be reached afterward.
     const cancel = () => {
         setIsOpenEnd(false);
         setIsOpen(false);
+        setIsAllDay(false);
         onCancel();
     }
 
@@ -118,9 +121,19 @@ export default function TimePickerModal({ isOpen, setIsOpen, onSubmit, onCancel 
         setStartTimeString(sendTime());
     }
 
+    // Cancelling the END modal should cancel this whole flow too,
+    // not just go "back" to a half-finished start-time screen.
     const cancelFromEnd = () => {
         setIsOpenEnd(false);
         cancel();
+    }
+
+    // When "All Day" is checked, there's no start/end time to collect,
+    // so this skips EndTimePickerModal entirely and submits right away.
+    const submitAllDay = () => {
+        onSubmitAllDay();
+        setIsOpen(false);
+        setIsAllDay(false);
     }
 
     return (
@@ -129,14 +142,28 @@ export default function TimePickerModal({ isOpen, setIsOpen, onSubmit, onCancel 
             <div className="modal">
                 <div className="overlay" onClick={cancel}></div>
                 <div className="modal-content">
-                    <WheelPickerWrapper>
-                        <WheelPicker options={hours} value={valueHours} onValueChange={setValueHours}/>
-                        <WheelPicker options={minutes} value={valueMinutes} onValueChange={setValueMinutes}/>
-                        <WheelPicker options={meridiem} value={valueMeridiem} onValueChange={setValueMeridiem}/>
-                    </WheelPickerWrapper>
+                    <label className="flex items-center gap-2 font-dynapuff pb-2">
+                        <input
+                            type="checkbox"
+                            checked={isAllDay}
+                            onChange={(e) => setIsAllDay(e.target.checked)}
+                        />
+                        All Day
+                    </label>
+                    {!isAllDay && (
+                        <WheelPickerWrapper>
+                            <WheelPicker options={hours} value={valueHours} onValueChange={setValueHours}/>
+                            <WheelPicker options={minutes} value={valueMinutes} onValueChange={setValueMinutes}/>
+                            <WheelPicker options={meridiem} value={valueMeridiem} onValueChange={setValueMeridiem}/>
+                        </WheelPickerWrapper>
+                    )}
                     <div className="flex items-center justify-between pt-2">
                         <button className="border-2 border-[#0A3323] rounded-sm bg-[#0A3323] text-[#839958] font-dynapuff" onClick={cancel}>Cancel</button>
-                        <button className="border-2 border-[#0A3323] rounded-sm bg-[#0A3323] text-[#839958] font-dynapuff" onClick={toggleModalEnd}>Continue</button>
+                        {isAllDay ? (
+                            <button className="border-2 border-[#0A3323] rounded-sm bg-[#0A3323] text-[#839958] font-dynapuff" onClick={submitAllDay}>Submit</button>
+                        ) : (
+                            <button className="border-2 border-[#0A3323] rounded-sm bg-[#0A3323] text-[#839958] font-dynapuff" onClick={toggleModalEnd}>Continue</button>
+                        )}
                     </div>
                 </div>
             </div>

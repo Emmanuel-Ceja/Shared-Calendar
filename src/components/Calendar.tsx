@@ -42,6 +42,36 @@ export default function Calendar() {
     }
   }
 
+  async function handleCreateAllDayEvent() {
+    if (!clickedDate) return;
+
+    // Google's "end" date is exclusive for all-day events, so a single
+    // day event needs end = start + 1 day, not end = start.
+    const nextDay = new Date(clickedDate);
+    nextDay.setDate(nextDay.getDate() + 1);
+    const endDateString = nextDay.toISOString().split("T")[0];
+
+    const event = {
+      summary: eventTitle || "New Event",
+      start: { date: clickedDate },
+      end: { date: endDateString },
+    };
+
+    const response = await fetch("/api/create-event", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(event),
+    });
+
+    if (response.ok) {
+      alert("Event created!");
+      fetchEvents();
+      resetEventState();
+    } else {
+      alert("Failed to create event.");
+    }
+  }
+
   // Clears out any leftover data from a cancelled or completed attempt
   // so the next time the user opens the flow, it starts fresh.
   function resetEventState() {
@@ -97,6 +127,7 @@ export default function Calendar() {
         isOpen={isOpen}
         setIsOpen={setIsOpen}
         onSubmit={handleCreateEvent}
+        onSubmitAllDay={handleCreateAllDayEvent}
         onCancel={resetEventState}/>
     </div>
   );
