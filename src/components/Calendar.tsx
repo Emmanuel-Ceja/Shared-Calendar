@@ -132,13 +132,13 @@ export default function Calendar() {
       // BEFORE building and returning the final object below.
       let color = "#888888"; // fallback, shouldn't normally happen
       if (e.created_by === MY_EMAIL) {
-        color = "#3B82F6"; // blue
+        color = "#105666"; // blue
       } else if (e.created_by === HER_EMAIL) {
-        color = "#EC4899"; // pink
+        color = "#A7626B"; // pink
       }
       // Date night overrides whoever created it -- always purple.
       if (e.is_date_night) {
-        color = "#8B5CF6"; // purple
+        color = "#503447"; // purple
       }
 
       return {
