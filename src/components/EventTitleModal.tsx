@@ -6,7 +6,7 @@ export default function EventTitleModal({isOpen, setIsOpen, onSubmit, onContinue
     const [eventTitle, setEventTitle] = useState("");
 
     const cancel = () => {
-        setEventTitle(""); // clear this modal's own local input too
+        setEventTitle(""); 
         setIsOpen(false);
         onCancel();
     }

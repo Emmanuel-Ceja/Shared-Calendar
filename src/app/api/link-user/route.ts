@@ -11,9 +11,6 @@ export async function POST(req: NextRequest) {
 
   const { linkedEmail } = await req.json();
 
-  // Check both directions before inserting, so clicking "Link" from
-  // either person's account never creates a second, duplicate row for
-  // the same relationship.
   const { data: existing } = await supabase
     .from("linked_users")
     .select("*")

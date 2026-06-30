@@ -12,8 +12,6 @@ export default function EventDetailModal({ isOpen, setIsOpen, event, onDelete, c
         onDelete(id, google_event_id);
     }
 
-    // Only the person who created the event has a valid Google access
-    // token for it, so only they're allowed to delete it.
     const isOwner = isOpen && event?.extendedProps?.created_by === currentUserEmail;
 
     return (

@@ -9,13 +9,11 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
-  // find linked user
   const { data: links } = await supabase
     .from("linked_users")
     .select("*")
     .or(`user_a.eq.${token.email},user_b.eq.${token.email}`);
 
-  // get all emails to fetch events for
   const emails = [token.email];
   if (links && links.length > 0) {
     links.forEach((link: any) => {
@@ -24,7 +22,6 @@ export async function GET(req: NextRequest) {
     });
   }
 
-  // fetch events for all linked users
   const { data: events } = await supabase
     .from("events")
     .select("*")

@@ -15,12 +15,9 @@ export async function POST(req: NextRequest) {
   const startValue = event.start.dateTime ?? event.start.date;
   const endValue = event.end.dateTime ?? event.end.date;
 
-  // is_date_night isn't a real Google Calendar field, so pull it out
-  // before sending the rest of the object to Google's API.
   const { is_date_night, ...googleEvent } = event;
 
-  // Save to Google Calendar FIRST so we have its event id to store
-  // alongside the Supabase row.
+
   let googleEventId: string | null = null;
   try {
     const auth = new google.auth.OAuth2(

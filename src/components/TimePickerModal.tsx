@@ -108,8 +108,6 @@ export default function TimePickerModal({ isOpen, setIsOpen, onSubmit, onSubmitA
         return time;
     }
 
-    // Cancel here must also make sure the nested EndTimePickerModal
-    // can't stay open or be reached afterward.
     const cancel = () => {
         setIsOpenEnd(false);
         setIsOpen(false);
@@ -124,15 +122,11 @@ export default function TimePickerModal({ isOpen, setIsOpen, onSubmit, onSubmitA
         setStartTimeString(sendTime());
     }
 
-    // Cancelling the END modal should cancel this whole flow too,
-    // not just go "back" to a half-finished start-time screen.
     const cancelFromEnd = () => {
         setIsOpenEnd(false);
         cancel();
     }
 
-    // When "All Day" is checked, there's no start/end time to collect,
-    // so this skips EndTimePickerModal entirely and submits right away.
     const submitAllDay = () => {
         onSubmitAllDay(isDate);
         setIsOpen(false);

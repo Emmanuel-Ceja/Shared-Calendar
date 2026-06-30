@@ -9,9 +9,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
-  // Only delete a link row that the signed-in user is actually part of --
-  // stops someone from being able to unlink two other people's accounts
-  // by guessing a row id.
   const { error } = await supabase
     .from("linked_users")
     .delete()

@@ -16,9 +16,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Missing event id" }, { status: 400 });
   }
 
-  // Server-side ownership check. The UI already hides the Delete button
-  // for non-owners, but this is the actual enforcement -- without it,
-  // anyone could call this route directly and delete someone else's event.
   const { data: existingEvent, error: fetchError } = await supabase
     .from("events")
     .select("created_by")
@@ -36,9 +33,6 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Delete from Google Calendar. Since only the creator reaches this
-  // point now, their own access token always matches the calendar this
-  // event actually lives in.
   if (google_event_id) {
     try {
       const auth = new google.auth.OAuth2(
@@ -57,14 +51,12 @@ export async function POST(req: NextRequest) {
         eventId: google_event_id,
       });
     } catch (err: any) {
-      // If Google's copy is already gone for some reason, don't let
-      // that block removing it from Supabase too.
+
       console.error("Google Calendar delete error:", err.message);
     }
   }
 
-  // Delete from Supabase, which is what makes it disappear from both
-  // partners' FullCalendar views.
+
   const { error } = await supabase.from("events").delete().eq("id", id);
 
   if (error) {
