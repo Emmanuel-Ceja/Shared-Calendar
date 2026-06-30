@@ -22,19 +22,34 @@ export default function EventDetailModal({ isOpen, setIsOpen, event, onDelete, c
         {isOpen && (
             <div className="modal">
                 <div className="overlay" onClick={exit}></div>
-                <div className="modal-content font-dynapuff text-[#839958]">
-                    <div className="flex gap-2">
-                        <p className="font-bold text-[#0A3323]">Title:</p>
-                        <p>{event.title}</p>
-                        <p className="font-bold text-[#0A3323]">Start:</p> 
-                        <p>{event.start.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} </p>
-                        <p className="font-bold text-[#0A3323]">End:</p>
-                        <p>{event.end.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>
+                <div className="modal-content font-dynapuff text-[#839958] max-w-sm mx-auto">
+                    <div className="flex flex-col gap-2 mb-4">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-1">
+                            <p className="font-bold text-[#0A3323]">Title:</p>
+                            <p>{event.title}</p>
+                        </div>
+                        {event.allDay ? (
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-1">
+                                <p className="font-bold text-[#0A3323]">Time:</p>
+                                <p>All Day</p>
+                            </div>
+                        ) : (
+                            <>
+                                <div className="flex flex-col sm:flex-row sm:items-center gap-1">
+                                    <p className="font-bold text-[#0A3323]">Start:</p> 
+                                    <p>{event.start.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} </p>
+                                </div>
+                                <div className="flex flex-col sm:flex-row sm:items-center gap-1">
+                                    <p className="font-bold text-[#0A3323]">End:</p>
+                                    <p>{event.end.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>
+                                </div>
+                            </>
+                        )}
                     </div>
-                    <div className="flex justify-between">
-                        <button className="border-2 border-[#0A3323] rounded-sm bg-[#0A3323] text-[#839958]" onClick={exit}>Exit</button>
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-2 pt-2">
+                        <button className="w-full sm:w-auto border-2 border-[#0A3323] rounded-sm bg-[#0A3323] text-[#839958] px-4 py-2 touch-manipulation" onClick={exit}>Exit</button>
                         {isOwner && (
-                            <button className="border-2 border-[#0A3323] rounded-sm bg-[#0A3323] text-[#839958]" onClick={deleteEvent}>Delete Event</button>
+                            <button className="w-full sm:w-auto border-2 border-[#0A3323] rounded-sm bg-[#0A3323] text-[#839958] px-4 py-2 touch-manipulation" onClick={deleteEvent}>Delete Event</button>
                         )}
                     </div>
                 </div>

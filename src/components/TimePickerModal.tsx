@@ -146,22 +146,22 @@ export default function TimePickerModal({ isOpen, setIsOpen, onSubmit, onSubmitA
             <div className="modal">
                 <div className="overlay" onClick={cancel}></div>
                 <div className="modal-content">
-                    <div className="flex items-center gap-4 font-dynapuff pb-2">
-                        <label className="flex items-center gap-2">
+                    <div className="flex flex-col sm:flex-row items-center gap-4 font-dynapuff pb-2">
+                        <label className="flex items-center gap-2 touch-manipulation">
                             <input
                                 type="checkbox"
                                 checked={isAllDay}
                                 onChange={(e) => setIsAllDay(e.target.checked)}
                             />
-                            All Day?
+                            All Day
                         </label>
-                        <label className="flex items-center gap-2">
+                        <label className="flex items-center gap-2 touch-manipulation">
                             <input
                                 type="checkbox"
                                 checked={isDate}
                                 onChange={(e) => setIsDate(e.target.checked)}
                             />
-                            Date?
+                            Date
                         </label>
                     </div>
                     {!isAllDay && (
@@ -171,12 +171,12 @@ export default function TimePickerModal({ isOpen, setIsOpen, onSubmit, onSubmitA
                             <WheelPicker options={meridiem} value={valueMeridiem} onValueChange={setValueMeridiem}/>
                         </WheelPickerWrapper>
                     )}
-                    <div className="flex items-center justify-between pt-2">
-                        <button className="border-2 border-[#0A3323] rounded-sm bg-[#0A3323] text-[#839958] font-dynapuff hover:bg-[#839958] hover:text-[#0A3323]" onClick={cancel}>Cancel</button>
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-2 pt-2">
+                        <button className="w-full sm:w-auto border-2 border-[#0A3323] rounded-sm bg-[#0A3323] text-[#839958] font-dynapuff px-4 py-2 touch-manipulation" onClick={cancel}>Cancel</button>
                         {isAllDay ? (
-                            <button className="border-2 border-[#0A3323] rounded-sm bg-[#0A3323] text-[#839958] font-dynapuff hover:bg-[#839958] hover:text-[#0A3323]" onClick={submitAllDay}>Submit</button>
+                            <button className="w-full sm:w-auto border-2 border-[#0A3323] rounded-sm bg-[#0A3323] text-[#839958] font-dynapuff px-4 py-2 touch-manipulation" onClick={submitAllDay}>Submit</button>
                         ) : (
-                            <button className="border-2 border-[#0A3323] rounded-sm bg-[#0A3323] text-[#839958] font-dynapuff hover:bg-[#839958] hover:text-[#0A3323]" onClick={toggleModalEnd}>Continue</button>
+                            <button className="w-full sm:w-auto border-2 border-[#0A3323] rounded-sm bg-[#0A3323] text-[#839958] font-dynapuff px-4 py-2 touch-manipulation" onClick={toggleModalEnd}>Continue</button>
                         )}
                     </div>
                 </div>

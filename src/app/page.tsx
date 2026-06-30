@@ -64,7 +64,7 @@ export default function Home() {
 
   return (
     <div>
-      <div style={{ padding: "10px" }}>
+      <div style={{ padding: "10px", display: "flex", justifyContent: "flex-end" }}>
         <MenuBar
           isLinked={isLinked}
           onOpenLinkModal={() => setIsLinkModalOpen(true)}/>

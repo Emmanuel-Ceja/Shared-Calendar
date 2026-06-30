@@ -8,11 +8,12 @@ import interactionPlugin from "@fullcalendar/interaction";
 import TimePickerModal from "@/components/TimePickerModal";
 import EventTitleModal from "./EventTitleModal";
 import EventDetailModal from "./EventDetailModal";
+import { supabase } from "@/lib/supabase";
 
 // Hardcoded since this app is just for two specific people, not a
 // general audience -- no need for a database column to track this.
-const MY_EMAIL = process.env.NEXT_PUBLIC_MY_EMAIL;
-const HER_EMAIL = process.env.NEXT_PUBLIC_HER_EMAIL;
+const MY_EMAIL = process.env.NEXT_PUBLIC_MY_EMAIL || "";
+const HER_EMAIL = process.env.NEXT_PUBLIC_HER_EMAIL || ""; // replace with her actual email
 
 export default function Calendar() {
   const { data: session } = useSession();
@@ -26,6 +27,26 @@ export default function Calendar() {
 
   useEffect(() => {
     fetchEvents();
+
+    // Subscribe to any change (insert, update, delete) on the events
+    // table. This is what makes a partner's new/deleted event show up
+    // here without needing to manually refresh the page.
+    const channel = supabase
+      .channel("events-changes")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "events" },
+        () => {
+          fetchEvents();
+        }
+      )
+      .subscribe();
+
+    // Cleanup: stop listening when this component unmounts, so we don't
+    // pile up duplicate subscriptions every time the page re-renders.
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   async function handleCreateEvent(startTime: string, endTime: string, isDate: boolean) {
@@ -132,13 +153,13 @@ export default function Calendar() {
       // BEFORE building and returning the final object below.
       let color = "#888888"; // fallback, shouldn't normally happen
       if (e.created_by === MY_EMAIL) {
-        color = "#105666"; // blue
+        color = "#3B82F6"; // blue
       } else if (e.created_by === HER_EMAIL) {
-        color = "#A7626B"; // pink
+        color = "#EC4899"; // pink
       }
       // Date night overrides whoever created it -- always purple.
       if (e.is_date_night) {
-        color = "#503447"; // purple
+        color = "#8B5CF6"; // purple
       }
 
       return {
@@ -165,7 +186,7 @@ export default function Calendar() {
   }
 
   return (
-    <div style={{ width: "100%", height: "100vh", padding: "20px", boxSizing: "border-box" }}>
+    <div style={{ width: "100%", height: "calc(100vh - 50px)", padding: "10px", boxSizing: "border-box" }}>
       <FullCalendar
         plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
         initialView={"dayGridMonth"}
@@ -174,7 +195,7 @@ export default function Calendar() {
         events={events}
         height="100%"
         headerToolbar={{
-          right: 'dayGridMonth,timeGridWeek,prev,next,today',
+          right: 'dayGridMonth,timeGridDay,prev,next,today',
           center: 'title',
           left: ''
         }}
