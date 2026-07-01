@@ -52,6 +52,21 @@ export default function Home() {
     }
   }
 
+  async function importGoogleCalendar() {
+    const response = await fetch("/api/import-google-calendar", {
+      method: "POST",
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      alert(`Imported ${data.imported} events, skipped ${data.skipped} duplicates`);
+      checkLinkStatus();
+    } else {
+      alert(`Failed to import: ${data.error}`);
+    }
+  }
+
   if (!session) {
     return (
       <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
@@ -67,7 +82,8 @@ export default function Home() {
       <div style={{ padding: "10px", display: "flex", justifyContent: "flex-end" }}>
         <MenuBar
           isLinked={isLinked}
-          onOpenLinkModal={() => setIsLinkModalOpen(true)}/>
+          onOpenLinkModal={() => setIsLinkModalOpen(true)}
+          onImportGoogle={importGoogleCalendar}/>
       </div>
       <LinkModal
         isOpen={isLinkModalOpen}
