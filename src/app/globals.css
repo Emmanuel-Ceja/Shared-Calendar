@@ -103,14 +103,13 @@
 @media (max-width: 640px) {
   .fc-daygrid-day {
     min-height: 100px !important;
-    max-height: 110px !important;
     padding: 4px !important;
     overflow: visible !important;
   }
 
   .fc-daygrid-day-frame {
-    max-height: 100px !important;
-    overflow: hidden !important;
+    max-height: none !important;
+    overflow: visible !important;
   }
 
   .fc-daygrid-day-number {
@@ -133,11 +132,13 @@
     font-size: 11px !important;
   }
 
-  .fc-event-title {
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    white-space: nowrap !important;
-    display: block !important;
+  .fc-daygrid-block-event {
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  .fc-daygrid-day-events {
+    overflow: visible !important;
   }
 
   .fc-daygrid-day-other {
