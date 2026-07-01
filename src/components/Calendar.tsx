@@ -13,8 +13,8 @@ import { supabase } from "@/lib/supabase";
 
 // Hardcoded since this app is just for two specific people, not a
 // general audience -- no need for a database column to track this.
-const YOUR_EMAIL = "ceja.emmanuelec1@gmail.com";
-const HER_EMAIL = "her-email@gmail.com"; // replace with her actual email
+const MY_EMAIL = process.env.NEXT_PUBLIC_MY_EMAIL || "";
+const HER_EMAIL = process.env.NEXT_PUBLIC_HER_EMAIL || ""; // replace with her actual email
 
 export default function Calendar() {
   const { data: session } = useSession();
@@ -175,7 +175,7 @@ export default function Calendar() {
     const data = await response.json();
     const formatted = data.map((e: any) => {
       let color = "#888888";
-      if (e.created_by === YOUR_EMAIL) {
+      if (e.created_by === MY_EMAIL) {
         color = "#3B82F6";
       } else if (e.created_by === HER_EMAIL) {
         color = "#EC4899";

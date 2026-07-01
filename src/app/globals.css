@@ -64,31 +64,39 @@
   color: #839958;
   border: 1px solid #a1a1a1 !important;
   border-radius: 8px !important;
-  overflow: hidden;
+  overflow: visible !important;
   min-height: 100px;
 }
 
-/* Style all-day event blocks to span properly across days */
+/* All-day event container styling */
+.fc-daygrid-day-events {
+  margin: 0 !important;
+}
+
 .fc-daygrid-day-frame {
   position: relative;
 }
 
+/* Style all-day events to display as colored bars */
 .fc-col-event {
-  box-shadow: none;
-  border: none;
   margin-bottom: 2px;
-}
-
-/* Multi-day all-day events should display as bars */
-.fc-daygrid-block-event {
-  background-color: inherit !important;
+  padding: 2px 4px;
+  font-size: 12px;
+  border-radius: 3px;
   border: none !important;
 }
 
-.fc-daygrid-block-event .fc-event-title {
+.fc-col-event-title {
+  font-weight: normal;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* Ensure multi-day all-day events span correctly */
+.fc-daygrid-block-event {
+  position: relative;
+  margin-bottom: 2px;
 }
 
 /* Mobile optimizations for better readability and event visibility */
