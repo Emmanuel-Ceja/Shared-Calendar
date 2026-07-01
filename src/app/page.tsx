@@ -11,6 +11,16 @@ export default function Home() {
   const [partnerEmail, setPartnerEmail] = useState("");
   const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
+  const [isImportDisabled, setIsImportDisabled] = useState(false);
+
+  // Disable import button for 3 seconds after sign-in to ensure token is ready
+  useEffect(() => {
+    if (session) {
+      setIsImportDisabled(true);
+      const timer = setTimeout(() => setIsImportDisabled(false), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [session]);
 
   useEffect(() => {
     if (session) {
@@ -88,7 +98,8 @@ export default function Home() {
           isLinked={isLinked}
           onOpenLinkModal={() => setIsLinkModalOpen(true)}
           onImportGoogle={importGoogleCalendar}
-          isImporting={isImporting}/>
+          isImporting={isImporting}
+          isImportDisabled={isImportDisabled}/>
       </div>
       <LinkModal
         isOpen={isLinkModalOpen}
