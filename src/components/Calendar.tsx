@@ -197,7 +197,7 @@ export default function Calendar() {
         events={events}
         height="100%"
         headerToolbar={{
-          right: 'dayGridMonth,timeGridWeek,prev,next,today',
+          right: 'dayGridMonth,timeGridDay,prev,next,today',
           center: 'title',
           left: ''
         }}
