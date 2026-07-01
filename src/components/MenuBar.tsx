@@ -33,7 +33,7 @@ export default function MenuBar({ isLinked, onOpenLinkModal, onImportGoogle } : 
                     </button>
                     <button
                         className="px-4 py-3 text-left hover:bg-[#839958] hover:text-[#0A3323] active:bg-[#839958] active:text-[#0A3323] touch-manipulation"
-                        onClick={() => signOut()}
+                        onClick={() => signOut({ redirect: true, callbackUrl: "/" })}
                     >
                         Sign Out
                     </button>
