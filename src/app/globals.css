@@ -68,6 +68,29 @@
   min-height: 100px;
 }
 
+/* Style all-day event blocks to span properly across days */
+.fc-daygrid-day-frame {
+  position: relative;
+}
+
+.fc-col-event {
+  box-shadow: none;
+  border: none;
+  margin-bottom: 2px;
+}
+
+/* Multi-day all-day events should display as bars */
+.fc-daygrid-block-event {
+  background-color: inherit !important;
+  border: none !important;
+}
+
+.fc-daygrid-block-event .fc-event-title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* Mobile optimizations for better readability and event visibility */
 @media (max-width: 640px) {
   .fc-daygrid-day {
