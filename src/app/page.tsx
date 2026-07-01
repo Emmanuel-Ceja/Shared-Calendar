@@ -10,6 +10,7 @@ export default function Home() {
   const [isLinked, setIsLinked] = useState(false);
   const [partnerEmail, setPartnerEmail] = useState("");
   const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
 
   useEffect(() => {
     if (session) {
@@ -53,6 +54,7 @@ export default function Home() {
   }
 
   async function importGoogleCalendar() {
+    setIsImporting(true);
     const response = await fetch("/api/import-google-calendar", {
       method: "POST",
     });
@@ -65,6 +67,8 @@ export default function Home() {
     } else {
       alert(`Failed to import: ${data.error}`);
     }
+
+    setIsImporting(false);
   }
 
   if (!session) {
@@ -83,7 +87,8 @@ export default function Home() {
         <MenuBar
           isLinked={isLinked}
           onOpenLinkModal={() => setIsLinkModalOpen(true)}
-          onImportGoogle={importGoogleCalendar}/>
+          onImportGoogle={importGoogleCalendar}
+          isImporting={isImporting}/>
       </div>
       <LinkModal
         isOpen={isLinkModalOpen}

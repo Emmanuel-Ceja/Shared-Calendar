@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { signOut } from "next-auth/react";
 
-export default function MenuBar({ isLinked, onOpenLinkModal, onImportGoogle } : { isLinked: boolean; onOpenLinkModal: () => void; onImportGoogle: () => void }) {
+export default function MenuBar({ isLinked, onOpenLinkModal, onImportGoogle, isImporting } : { isLinked: boolean; onOpenLinkModal: () => void; onImportGoogle: () => void; isImporting: boolean }) {
     const [isOpen, setIsOpen] = useState(false);
 
     const toggleMenu = () => {
@@ -20,10 +20,15 @@ export default function MenuBar({ isLinked, onOpenLinkModal, onImportGoogle } : 
             {isOpen && (
                 <div className="absolute right-0 mt-1 flex flex-col border-2 border-[#0A3323] rounded-sm bg-[#0A3323] text-[#839958] z-50 min-w-max">
                     <button
-                        className="px-4 py-3 text-left hover:bg-[#839958] hover:text-[#0A3323] active:bg-[#839958] active:text-[#0A3323] touch-manipulation"
+                        className={`px-4 py-3 text-left touch-manipulation ${
+                          isImporting 
+                            ? "opacity-50 cursor-not-allowed" 
+                            : "hover:bg-[#839958] hover:text-[#0A3323] active:bg-[#839958] active:text-[#0A3323]"
+                        }`}
                         onClick={() => { setIsOpen(false); onImportGoogle(); }}
+                        disabled={isImporting}
                     >
-                        Import Google Calendar
+                        {isImporting ? "Importing..." : "Import Google Calendar"}
                     </button>
                     <button
                         className="px-4 py-3 text-left hover:bg-[#839958] hover:text-[#0A3323] active:bg-[#839958] active:text-[#0A3323] touch-manipulation"
