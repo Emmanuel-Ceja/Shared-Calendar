@@ -19,6 +19,14 @@ export default function TimePickerModal({isOpen, setIsOpen, onSubmit, onToggleEn
     const [isMultiDay, setIsMultiDay] = useState(false);
     const [endDateStr, setEndDateStr] = useState("");
 
+    // Auto-enable all-day when multiple days is checked
+    const handleMultiDayChange = (checked: boolean) => {
+        setIsMultiDay(checked);
+        if (checked) {
+            setIsAllDay(true); // Force all-day when multiple days selected
+        }
+    }
+
     const toggleModal = () => {
         setIsOpen(!isOpen)
     }
@@ -55,14 +63,16 @@ export default function TimePickerModal({isOpen, setIsOpen, onSubmit, onToggleEn
                 <div className="overlay" onClick={cancel}></div>
                 <div className="modal-content">
                     <div className="flex flex-col sm:flex-row items-center gap-4 font-dynapuff pb-2">
-                        <label className="flex items-center gap-2 touch-manipulation">
-                            <input
-                                type="checkbox"
-                                checked={isAllDay}
-                                onChange={(e) => setIsAllDay(e.target.checked)}
-                            />
-                            All Day
-                        </label>
+                        {!isMultiDay && (
+                            <label className="flex items-center gap-2 touch-manipulation">
+                                <input
+                                    type="checkbox"
+                                    checked={isAllDay}
+                                    onChange={(e) => setIsAllDay(e.target.checked)}
+                                />
+                                All Day
+                            </label>
+                        )}
                         <label className="flex items-center gap-2 touch-manipulation">
                             <input
                                 type="checkbox"
@@ -75,13 +85,13 @@ export default function TimePickerModal({isOpen, setIsOpen, onSubmit, onToggleEn
                             <input
                                 type="checkbox"
                                 checked={isMultiDay}
-                                onChange={(e) => setIsMultiDay(e.target.checked)}
+                                onChange={(e) => handleMultiDayChange(e.target.checked)}
                             />
                             Multiple Days
                         </label>
                     </div>
 
-                    {!isAllDay && (
+                    {!isAllDay && !isMultiDay && (
                         <WheelPickerWrapper>
                             <WheelPicker options={hours} value={valueHours} onValueChange={setValueHours}/>
                             <WheelPicker options={minutes} value={valueMinutes} onValueChange={setValueMinutes}/>
@@ -103,7 +113,7 @@ export default function TimePickerModal({isOpen, setIsOpen, onSubmit, onToggleEn
 
                     <div className="flex flex-col sm:flex-row items-center justify-between gap-2 pt-2">
                         <button className="w-full sm:w-auto border-2 border-[#0A3323] rounded-sm bg-[#0A3323] text-[#839958] font-dynapuff px-4 py-2 touch-manipulation" onClick={cancel}>Cancel</button>
-                        {isAllDay ? (
+                        {isAllDay || isMultiDay ? (
                             <button className="w-full sm:w-auto border-2 border-[#0A3323] rounded-sm bg-[#0A3323] text-[#839958] font-dynapuff px-4 py-2 touch-manipulation" onClick={submitAllDay}>Submit</button>
                         ) : (
                             <button className="w-full sm:w-auto border-2 border-[#0A3323] rounded-sm bg-[#0A3323] text-[#839958] font-dynapuff px-4 py-2 touch-manipulation" onClick={toggleModalEnd}>Continue</button>
