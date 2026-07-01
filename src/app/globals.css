@@ -68,7 +68,6 @@
   min-height: 100px;
 }
 
-/* All-day event container styling */
 .fc-daygrid-day-events {
   margin: 0 !important;
 }
@@ -77,7 +76,6 @@
   position: relative;
 }
 
-/* Style all-day events to display as colored bars */
 .fc-col-event {
   margin-bottom: 2px;
   padding: 2px 4px;
@@ -93,7 +91,6 @@
   text-overflow: ellipsis;
 }
 
-/* Ensure multi-day all-day events span correctly */
 .fc-daygrid-block-event {
   position: relative;
   margin-bottom: 2px;

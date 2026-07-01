@@ -22,7 +22,6 @@ export async function POST(req: NextRequest) {
 
     const calendar = google.calendar({ version: "v3", auth });
 
-    // Fetch all events from user's Google Calendar
     const response = await calendar.events.list({
       calendarId: "primary",
       maxResults: 250,
@@ -32,24 +31,16 @@ export async function POST(req: NextRequest) {
     let importedCount = 0;
     let skippedCount = 0;
 
-    // For each Google Calendar event, check if it already exists in Supabase
     for (const event of googleEvents) {
       if (!event.summary || !event.start) continue;
 
-      // Determine start and end times
       const startValue = event.start.dateTime || event.start.date;
       let endValue = event.end?.dateTime || event.end?.date || startValue;
 
-      // For all-day events, Google Calendar's end date is exclusive (day after event ends)
-      // FullCalendar also expects exclusive end dates, so this is already correct
-      // Just make sure end is defined
       if (!endValue) {
-        // If end is missing, set it to be the same as start (single day event)
         endValue = startValue;
       }
 
-      // Check if this event already exists in Supabase
-      // Match by: title + start_time + created_by (to avoid duplicates)
       const { data: existing } = await supabase
         .from("events")
         .select("id")

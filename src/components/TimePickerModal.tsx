@@ -19,11 +19,10 @@ export default function TimePickerModal({isOpen, setIsOpen, onSubmit, onToggleEn
     const [isMultiDay, setIsMultiDay] = useState(false);
     const [endDateStr, setEndDateStr] = useState("");
 
-    // Auto-enable all-day when multiple days is checked
     const handleMultiDayChange = (checked: boolean) => {
         setIsMultiDay(checked);
         if (checked) {
-            setIsAllDay(true); // Force all-day when multiple days selected
+            setIsAllDay(true); 
         }
     }
 
