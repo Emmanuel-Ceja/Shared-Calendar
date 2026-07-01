@@ -23,17 +23,14 @@ export async function POST(req: NextRequest) {
     const calendar = google.calendar({ version: "v3", auth });
 
     // Fetch all events from user's Google Calendar
-    // Added singleEvents and orderBy to properly expand multi-day recurring events
     const response = await calendar.events.list({
       calendarId: "primary",
       maxResults: 250,
-      singleEvents: true,
-      orderBy: "startTime",
     });
 
     const googleEvents = response.data.items || [];
     let importedCount = 0;
-    let updatedCount = 0;
+    let skippedCount = 0;
 
     // For each Google Calendar event, check if it already exists in Supabase
     for (const event of googleEvents) {
@@ -41,33 +38,29 @@ export async function POST(req: NextRequest) {
 
       // Determine start and end times
       const startValue = event.start.dateTime || event.start.date;
-      const endValue = event.end?.dateTime || event.end?.date || startValue;
+      let endValue = event.end?.dateTime || event.end?.date || startValue;
+
+      // For all-day events, Google Calendar's end date is exclusive (day after event ends)
+      // FullCalendar also expects exclusive end dates, so this is already correct
+      // Just make sure end is defined
+      if (!endValue) {
+        // If end is missing, set it to be the same as start (single day event)
+        endValue = startValue;
+      }
 
       // Check if this event already exists in Supabase
-      // Match by google_event_id if available, fallback to title + start_time
-      let query = supabase.from("events").select("id");
-      
-      if (event.id) {
-        query = query.eq("google_event_id", event.id);
-      } else {
-        query = query.eq("title", event.summary).eq("start_time", startValue);
-      }
-      
-      const { data: existing } = await query
+      // Match by: title + start_time + created_by (to avoid duplicates)
+      const { data: existing } = await supabase
+        .from("events")
+        .select("id")
+        .eq("title", event.summary)
+        .eq("start_time", startValue)
         .eq("created_by", token.email)
         .maybeSingle();
 
       if (existing) {
-        // If the event exists, UPDATE it instead of skipping. 
-        // This ensures modified multi-day ranges are saved to Supabase.
-        await supabase.from("events").update({
-          title: event.summary,
-          start_time: startValue,
-          end_time: endValue,
-        }).eq("id", existing.id);
-        
-        updatedCount++;
-        continue; 
+        skippedCount++;
+        continue; // Already exists, skip
       }
 
       // Insert the event into Supabase
@@ -88,7 +81,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       imported: importedCount,
-      skipped: updatedCount, 
+      skipped: skippedCount,
     });
   } catch (err: any) {
     console.error("Import Google Calendar error:", err.message);

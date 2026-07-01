@@ -6,20 +6,24 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import TimePickerModal from "@/components/TimePickerModal";
+import EndTimePickerModal from "@/components/EndTimePickerModal";
 import EventTitleModal from "./EventTitleModal";
 import EventDetailModal from "./EventDetailModal";
 import { supabase } from "@/lib/supabase";
 
 // Hardcoded since this app is just for two specific people, not a
 // general audience -- no need for a database column to track this.
-const MY_EMAIL = process.env.NEXT_PUBLIC_MY_EMAIL || "";
-const HER_EMAIL = process.env.NEXT_PUBLIC_HER_EMAIL || "";      
+const YOUR_EMAIL = "ceja.emmanuelec1@gmail.com";
+const HER_EMAIL = "her-email@gmail.com"; // replace with her actual email
 
 export default function Calendar() {
   const { data: session } = useSession();
   const [events, setEvents] = useState([]);
   let [isOpen, setIsOpen] = useState(false);
+  let [isOpenEndTime, setIsOpenEndTime] = useState(false);
   const [clickedDate, setClickedDate] = useState("");
+  const [startTime, setStartTime] = useState("");
+  const [isDateNight, setIsDateNight] = useState(false);
   let [isOpenEventTitle, setIsOpenEventTitle] = useState(false);
   const [eventTitle, setEventTitle] = useState("");
   let [isOpenDetail, setIsOpenDetail] = useState(false);
@@ -49,6 +53,22 @@ export default function Calendar() {
     };
   }, []);
 
+  const handleTimePickerSubmit = (startTimeVal: string, endTime: string, isAllDay: boolean, isDate: boolean, endDate?: string) => {
+    if (isAllDay) {
+      handleCreateAllDayEvent(isDate, endDate);
+    } else {
+      // Store the start time and is date flag, then open EndTimePickerModal
+      setStartTime(startTimeVal);
+      setIsDateNight(isDate);
+      toggleModalEnd();
+    }
+  }
+
+  const toggleModalEnd = () => {
+    setIsOpen(false);
+    setIsOpenEndTime(true);
+  }
+
   async function handleCreateEvent(startTime: string, endTime: string, isDate: boolean) {
     if (!clickedDate) return;
 
@@ -74,12 +94,14 @@ export default function Calendar() {
     }
   }
 
-  async function handleCreateAllDayEvent(isDate: boolean) {
+  async function handleCreateAllDayEvent(isDate: boolean, endDate?: string) {
     if (!clickedDate) return;
 
-    // Google's "end" date is exclusive for all-day events, so a single
-    // day event needs end = start + 1 day, not end = start.
-    const nextDay = new Date(clickedDate);
+    // If endDate provided (multi-day), use it; otherwise, use the same day
+    const endDateForEvent = endDate || clickedDate;
+
+    // Google's "end" date is exclusive for all-day events, so add 1 day
+    const nextDay = new Date(endDateForEvent);
     nextDay.setDate(nextDay.getDate() + 1);
     const endDateString = nextDay.toISOString().split("T")[0];
 
@@ -130,7 +152,10 @@ export default function Calendar() {
   function resetEventState() {
     setClickedDate("");
     setEventTitle("");
+    setStartTime("");
+    setIsDateNight(false);
     setIsOpen(false);
+    setIsOpenEndTime(false);
     setIsOpenEventTitle(false);
   }
 
@@ -149,27 +174,36 @@ export default function Calendar() {
     const response = await fetch("/api/get-events");
     const data = await response.json();
     const formatted = data.map((e: any) => {
-      // Curly braces (instead of parentheses) let us run this if/else
-      // BEFORE building and returning the final object below.
-      let color = "#888888"; // fallback, shouldn't normally happen
-      if (e.created_by === MY_EMAIL) {
-        color = "#3B82F6"; // blue
+      let color = "#888888";
+      if (e.created_by === YOUR_EMAIL) {
+        color = "#3B82F6";
       } else if (e.created_by === HER_EMAIL) {
-        color = "#EC4899"; // pink
+        color = "#EC4899";
       }
-      // Date night overrides whoever created it -- always purple.
       if (e.is_date_night) {
-        color = "#8B5CF6"; // purple
+        color = "#8B5CF6";
       }
 
-      // Detect if this is an all-day event by checking if start_time
-      // is just a date (YYYY-MM-DD) with no time component
+      // Detect all-day events: start_time is just a date (YYYY-MM-DD)
       const isAllDay = /^\d{4}-\d{2}-\d{2}$/.test(e.start_time);
+
+      // For FullCalendar, ensure proper date/time format
+      let start = e.start_time;
+      let end = e.end_time;
+
+      // If it's an all-day event, FullCalendar needs the dates in YYYY-MM-DD format
+      // and the end date should be exclusive (day after last day of event)
+      if (isAllDay) {
+        // Dates are already in correct format from Supabase
+        // FullCalendar will properly span them as long as allDay is true
+        start = e.start_time; // e.g., "2026-07-01"
+        end = e.end_time;     // e.g., "2026-07-09" (exclusive end)
+      }
 
       return {
         title: e.title,
-        start: e.start_time,
-        end: e.end_time,
+        start: start,
+        end: end,
         allDay: isAllDay,
         color: color,
         extendedProps: {
@@ -197,7 +231,7 @@ export default function Calendar() {
         events={events}
         height="100%"
         headerToolbar={{
-          right: 'dayGridMonth,timeGridDay,prev,next,today',
+          right: 'dayGridMonth,timeGridWeek,prev,next,today',
           center: 'title',
           left: ''
         }}
@@ -217,9 +251,16 @@ export default function Calendar() {
       <TimePickerModal 
         isOpen={isOpen}
         setIsOpen={setIsOpen}
+        onSubmit={handleTimePickerSubmit}
+        onToggleEnd={toggleModalEnd}
+        dateStr={clickedDate}/>
+      <EndTimePickerModal
+        isOpen={isOpenEndTime}
+        setIsOpen={setIsOpenEndTime}
         onSubmit={handleCreateEvent}
-        onSubmitAllDay={handleCreateAllDayEvent}
-        onCancel={resetEventState}/>
+        onCancel={resetEventState}
+        startTime={startTime}
+        isDate={isDateNight}/>
     </div>
   );
 }

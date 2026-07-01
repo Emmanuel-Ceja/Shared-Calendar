@@ -1,137 +1,51 @@
 "use client"
 import "@/components/Modal.css";
-import { WheelPicker, type WheelPickerOption, WheelPickerWrapper } from "@/components/wheel-picker";
 import { useState } from "react";
-import EndTimePickerModal from "./EndTimePickerModal";
+import { WheelPicker, type WheelPickerOption, WheelPickerWrapper } from "@/components/wheel-picker";
 
-const hours: WheelPickerOption[] = [
-    { label: "1", value: "01" },
-    { label: "2", value: "02" },
-    { label: "3", value: "03" },
-    { label: "4", value: "04" },
-    { label: "5", value: "05" },
-    { label: "6", value: "06" },
-    { label: "7", value: "07" },
-    { label: "8", value: "08" },
-    { label: "9", value: "09" },
-    { label: "10", value: "10" },
-    { label: "11", value: "11" },
-    { label: "12", value: "12" },
-]
-const minutes : WheelPickerOption[] = [
-    { label: "00", value: "00" },
-    { label: "01", value: "01" },
-    { label: "02", value: "02" },
-    { label: "03", value: "03" },
-    { label: "04", value: "04" },
-    { label: "05", value: "05" },
-    { label: "06", value: "06" },
-    { label: "07", value: "07" },
-    { label: "08", value: "08" },
-    { label: "09", value: "09" },
-    { label: "10", value: "10" },
-    { label: "11", value: "11" },
-    { label: "12", value: "12" },
-    { label: "13", value: "13" },
-    { label: "14", value: "14" },
-    { label: "15", value: "15" },
-    { label: "16", value: "16" },
-    { label: "17", value: "17" },
-    { label: "18", value: "18" },
-    { label: "19", value: "19" },
-    { label: "20", value: "20" },
-    { label: "21", value: "21" },
-    { label: "22", value: "22" },
-    { label: "23", value: "23" },
-    { label: "24", value: "24" },
-    { label: "25", value: "25" },
-    { label: "26", value: "26" },
-    { label: "27", value: "27" },
-    { label: "28", value: "28" },
-    { label: "29", value: "29" },
-    { label: "30", value: "30" },
-    { label: "31", value: "31" },
-    { label: "32", value: "32" },
-    { label: "33", value: "33" },
-    { label: "34", value: "34" },
-    { label: "35", value: "35" },
-    { label: "36", value: "36" },
-    { label: "37", value: "37" },
-    { label: "38", value: "38" },
-    { label: "39", value: "39" },
-    { label: "40", value: "40" },
-    { label: "41", value: "41" },
-    { label: "42", value: "42" },
-    { label: "43", value: "43" },
-    { label: "44", value: "44" },
-    { label: "45", value: "45" },
-    { label: "46", value: "46" },
-    { label: "47", value: "47" },
-    { label: "48", value: "48" },
-    { label: "49", value: "49" },
-    { label: "50", value: "50" },
-    { label: "51", value: "51" },
-    { label: "52", value: "52" },
-    { label: "53", value: "53" },
-    { label: "54", value: "54" },
-    { label: "55", value: "55" },
-    { label: "56", value: "56" },
-    { label: "57", value: "57" },
-    { label: "58", value: "58" },
-    { label: "59", value: "59" },
-]
-const meridiem : WheelPickerOption[] = [
-    { label: "AM", value: "AM" },
-    { label: "PM", value: "PM" },
-]
+const hours: WheelPickerOption[] = Array.from({length: 12}, (_, i) => ({ label: String(i + 1).padStart(2, '0'), value: String(i + 1).padStart(2, '0') }));
+const minutes: WheelPickerOption[] = Array.from({length: 60}, (_, i) => ({ label: String(i).padStart(2, '0'), value: String(i).padStart(2, '0') }));
+const meridiem: WheelPickerOption[] = [
+  { label: 'AM', value: 'AM' },
+  { label: 'PM', value: 'PM' }
+];
 
-export default function TimePickerModal({ isOpen, setIsOpen, onSubmit, onSubmitAllDay, onCancel } : {isOpen: boolean; setIsOpen: (value: boolean) => void; onSubmit: (start: string, end: string, isDate: boolean) => void; onSubmitAllDay: (isDate: boolean) => void; onCancel: () => void}) {
+export default function TimePickerModal({isOpen, setIsOpen, onSubmit, onToggleEnd, dateStr}: {isOpen: boolean; setIsOpen: (value: boolean) => void; onSubmit: (startTime: string, endTime: string, isAllDay: boolean, isDate: boolean, endDate?: string) => void; onToggleEnd: () => void; dateStr: string}) {
     const [valueHours, setValueHours] = useState("01");
     const [valueMinutes, setValueMinutes] = useState("00");
     const [valueMeridiem, setValueMeridiem] = useState("AM");
-    let [isOpenEnd, setIsOpenEnd] = useState(false);
-    const [startTimeString, setStartTimeString] = useState("");
     const [isAllDay, setIsAllDay] = useState(false);
     const [isDate, setIsDate] = useState(false);
+    const [isMultiDay, setIsMultiDay] = useState(false);
+    const [endDateStr, setEndDateStr] = useState("");
+
+    const toggleModal = () => {
+        setIsOpen(!isOpen)
+    }
+
+    const cancel = () => {
+        toggleModal();
+    }
+
+    const submitAllDay = () => {
+        const endDate = isMultiDay ? endDateStr : undefined;
+        onSubmit("", "", true, isDate, endDate);
+        toggleModal();
+    }
+
+    const toggleModalEnd = () => {
+        onToggleEnd();
+        toggleModal();
+    }
 
     const sendTime = () => {
         let newHour = valueHours;
         if (valueMeridiem === "PM") {
-            if (valueHours !== "12") {
-                newHour = String(Number(valueHours) + 12);
-            }
+            if (valueHours !== "12") { newHour = String(Number(valueHours) + 12); }
         } else if (valueMeridiem === "AM" && valueHours === "12") {
             newHour = "00";
-        } 
-
-        const time = newHour + ":" + valueMinutes + ":00";
-        return time;
-    }
-
-    const cancel = () => {
-        setIsOpenEnd(false);
-        setIsOpen(false);
-        setIsAllDay(false);
-        setIsDate(false);
-        onCancel();
-    }
-
-    const toggleModalEnd = () => {
-        setIsOpenEnd(true);
-        setIsOpen(false);
-        setStartTimeString(sendTime());
-    }
-
-    const cancelFromEnd = () => {
-        setIsOpenEnd(false);
-        cancel();
-    }
-
-    const submitAllDay = () => {
-        onSubmitAllDay(isDate);
-        setIsOpen(false);
-        setIsAllDay(false);
-        setIsDate(false);
+        }
+        return newHour + ":" + valueMinutes + ":00";
     }
 
     return (
@@ -157,7 +71,16 @@ export default function TimePickerModal({ isOpen, setIsOpen, onSubmit, onSubmitA
                             />
                             Date
                         </label>
+                        <label className="flex items-center gap-2 touch-manipulation">
+                            <input
+                                type="checkbox"
+                                checked={isMultiDay}
+                                onChange={(e) => setIsMultiDay(e.target.checked)}
+                            />
+                            Multiple Days
+                        </label>
                     </div>
+
                     {!isAllDay && (
                         <WheelPickerWrapper>
                             <WheelPicker options={hours} value={valueHours} onValueChange={setValueHours}/>
@@ -165,6 +88,19 @@ export default function TimePickerModal({ isOpen, setIsOpen, onSubmit, onSubmitA
                             <WheelPicker options={meridiem} value={valueMeridiem} onValueChange={setValueMeridiem}/>
                         </WheelPickerWrapper>
                     )}
+
+                    {isMultiDay && (
+                        <div className="mb-4">
+                            <label className="font-dynapuff text-[#839958]">End Date:</label>
+                            <input
+                                type="date"
+                                value={endDateStr}
+                                onChange={(e) => setEndDateStr(e.target.value)}
+                                className="font-dynapuff w-full border-2 border-[#0A3323] rounded-sm px-3 py-2 text-base mt-2"
+                            />
+                        </div>
+                    )}
+
                     <div className="flex flex-col sm:flex-row items-center justify-between gap-2 pt-2">
                         <button className="w-full sm:w-auto border-2 border-[#0A3323] rounded-sm bg-[#0A3323] text-[#839958] font-dynapuff px-4 py-2 touch-manipulation" onClick={cancel}>Cancel</button>
                         {isAllDay ? (
@@ -175,15 +111,6 @@ export default function TimePickerModal({ isOpen, setIsOpen, onSubmit, onSubmitA
                     </div>
                 </div>
             </div>
-        )}
-        {isOpenEnd && (
-            <EndTimePickerModal
-                isOpen={isOpenEnd}
-                setIsOpen={setIsOpenEnd}
-                startTime={startTimeString}
-                isDate={isDate}
-                onSubmit={onSubmit}
-                onCancel={cancelFromEnd}/>
         )}
         </>
     )
