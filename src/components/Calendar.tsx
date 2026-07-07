@@ -11,9 +11,10 @@ import EventTitleModal from "./EventTitleModal";
 import EventDetailModal from "./EventDetailModal";
 import { supabase } from "@/lib/supabase";
 
-
-const MY_EMAIL = process.env.NEXT_PUBLIC_MY_EMAIL || "";
-const HER_EMAIL = process.env.NEXT_PUBLIC_HER_EMAIL || ""; 
+// Hardcoded since this app is just for two specific people, not a
+// general audience -- no need for a database column to track this.
+const YOUR_EMAIL = "ceja.emmanuelec1@gmail.com";
+const HER_EMAIL = "her-email@gmail.com"; // replace with her actual email
 
 export default function Calendar() {
   const { data: session } = useSession();
@@ -31,6 +32,9 @@ export default function Calendar() {
   useEffect(() => {
     fetchEvents();
 
+    // Subscribe to any change (insert, update, delete) on the events
+    // table. This is what makes a partner's new/deleted event show up
+    // here without needing to manually refresh the page.
     const channel = supabase
       .channel("events-changes")
       .on(
@@ -42,6 +46,8 @@ export default function Calendar() {
       )
       .subscribe();
 
+    // Cleanup: stop listening when this component unmounts, so we don't
+    // pile up duplicate subscriptions every time the page re-renders.
     return () => {
       supabase.removeChannel(channel);
     };
@@ -51,6 +57,7 @@ export default function Calendar() {
     if (isAllDay) {
       handleCreateAllDayEvent(isDate, endDate);
     } else {
+      // Store the start time and is date flag, then open EndTimePickerModal
       setStartTime(startTimeVal);
       setIsDateNight(isDate);
       toggleModalEnd();
@@ -67,8 +74,8 @@ export default function Calendar() {
 
     const event = {
       summary: eventTitle || "New Event",
-      start: { dateTime: `${clickedDate}T${startTime}-07:00` },
-      end: { dateTime: `${clickedDate}T${endTime}-07:00` },
+      start: { dateTime: `${clickedDate}T${startTime}Z` },
+      end: { dateTime: `${clickedDate}T${endTime}Z` },
       is_date_night: isDate,
     };
 
@@ -90,8 +97,10 @@ export default function Calendar() {
   async function handleCreateAllDayEvent(isDate: boolean, endDate?: string) {
     if (!clickedDate) return;
 
+    // If endDate provided (multi-day), use it; otherwise, use the same day
     const endDateForEvent = endDate || clickedDate;
 
+    // Google's "end" date is exclusive for all-day events, so add 1 day
     const nextDay = new Date(endDateForEvent);
     nextDay.setDate(nextDay.getDate() + 1);
     const endDateString = nextDay.toISOString().split("T")[0];
@@ -118,6 +127,9 @@ export default function Calendar() {
     }
   }
 
+  // Called from EventDetailModal's Delete button. Removes the event from
+  // Supabase (so it disappears for both linked partners) and from the
+  // signed-in user's own Google Calendar.
   async function handleDeleteEvent(id: string, googleEventId: string | null) {
     const response = await fetch("/api/delete-event", {
       method: "POST",
@@ -135,6 +147,8 @@ export default function Calendar() {
     }
   }
 
+  // Clears out any leftover data from a cancelled or completed attempt
+  // so the next time the user opens the flow, it starts fresh.
   function resetEventState() {
     setClickedDate("");
     setEventTitle("");
@@ -147,6 +161,11 @@ export default function Calendar() {
 
   async function dateClick(info: any) {
     setIsOpenEventTitle(true);
+    // In month view, info.dateStr is just "YYYY-MM-DD".
+    // In week/time-grid view, info.dateStr already includes a time
+    // and offset (e.g. "2026-06-23T01:30:00-07:00"). Splitting on "T"
+    // keeps only the date portion either way, so it's always a clean
+    // "YYYY-MM-DD" before startTime/endTime get appended later.
     const justTheDate = info.dateStr.split("T")[0];
     setClickedDate(justTheDate);
   }
@@ -155,8 +174,8 @@ export default function Calendar() {
     const response = await fetch("/api/get-events");
     const data = await response.json();
     const formatted = data.map((e: any) => {
-      let color = "#888888";
-      if (e.created_by === MY_EMAIL) {
+      let color = "#3B82F6"; // Default to blue instead of invisible gray
+      if (e.created_by === YOUR_EMAIL) {
         color = "#3B82F6";
       } else if (e.created_by === HER_EMAIL) {
         color = "#EC4899";
@@ -165,14 +184,20 @@ export default function Calendar() {
         color = "#8B5CF6";
       }
 
+      // Detect all-day events: start_time is just a date (YYYY-MM-DD)
       const isAllDay = /^\d{4}-\d{2}-\d{2}$/.test(e.start_time);
 
+      // For FullCalendar, ensure proper date/time format
       let start = e.start_time;
       let end = e.end_time;
 
+      // If it's an all-day event, FullCalendar needs the dates in YYYY-MM-DD format
+      // and the end date should be exclusive (day after last day of event)
       if (isAllDay) {
-        start = e.start_time; 
-        end = e.end_time;     
+        // Dates are already in correct format from Supabase
+        // FullCalendar will properly span them as long as allDay is true
+        start = e.start_time; // e.g., "2026-07-01"
+        end = e.end_time;     // e.g., "2026-07-09" (exclusive end)
       }
 
       return {
