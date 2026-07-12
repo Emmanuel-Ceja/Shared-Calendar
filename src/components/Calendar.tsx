@@ -74,10 +74,12 @@ export default function Calendar() {
 
     const event = {
       summary: eventTitle || "New Event",
-      start: { dateTime: `${clickedDate}T${startTime}Z` },
-      end: { dateTime: `${clickedDate}T${endTime}Z` },
+      start: { dateTime: `${clickedDate}T${startTime}-07:00` },
+      end: { dateTime: `${clickedDate}T${endTime}-07:00` },
       is_date_night: isDate,
     };
+
+    console.log("Sending event:", JSON.stringify(event, null, 2));
 
     const response = await fetch("/api/create-event", {
       method: "POST",
@@ -85,12 +87,15 @@ export default function Calendar() {
       body: JSON.stringify(event),
     });
 
+    const result = await response.json();
+    console.log("Response:", result);
+
     if (response.ok) {
       alert("Event created!");
       fetchEvents();
       resetEventState();
     } else {
-      alert("Failed to create event.");
+      alert(`Failed to create event: ${result.error}`);
     }
   }
 
