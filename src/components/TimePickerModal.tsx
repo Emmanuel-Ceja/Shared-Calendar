@@ -115,7 +115,7 @@ export default function TimePickerModal({isOpen, setIsOpen, onSubmit, onToggleEn
                         {isAllDay || isMultiDay ? (
                             <button className="w-full sm:w-auto border-2 border-[#0A3323] rounded-sm bg-[#0A3323] text-[#839958] font-dynapuff px-4 py-2 touch-manipulation" onClick={submitAllDay}>Submit</button>
                         ) : (
-                            <button className="w-full sm:w-auto border-2 border-[#0A3323] rounded-sm bg-[#0A3323] text-[#839958] font-dynapuff px-4 py-2 touch-manipulation" onClick={toggleModalEnd}>Continue</button>
+                            <button className="w-full sm:w-auto border-2 border-[#0A3323] rounded-sm bg-[#0A3323] text-[#839958] font-dynapuff px-4 py-2 touch-manipulation" onClick={() => onSubmit(sendTime(), "", false, isDate)}>Continue</button>
                         )}
                     </div>
                 </div>
