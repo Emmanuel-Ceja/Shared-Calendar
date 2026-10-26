@@ -11,10 +11,35 @@ import EventTitleModal from "./EventTitleModal";
 import EventDetailModal from "./EventDetailModal";
 import { supabase } from "@/lib/supabase";
 
-// Hardcoded since this app is just for two specific people, not a
-// general audience -- no need for a database column to track this.
-const YOUR_EMAIL = process.env.NEXT_PUBLIC_YOUR_EMAIL || "";
-const HER_EMAIL = process.env.NEXT_PUBLIC_HER_EMAIL || ""; // replace with her actual email
+
+const YOUR_EMAIL = process.env.NEXT_PUBLIC_MY_EMAIL || "";
+const HER_EMAIL = process.env.NEXT_PUBLIC_HER_EMAIL || ""; 
+
+function pacificOffset(dateStr: string, timeStr: string): string {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  const [hh, mm] = timeStr.split(":").map(Number);
+
+  const fmt = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/Los_Angeles",
+    timeZoneName: "shortOffset",
+  });
+
+  
+  const offsetHoursAt = (utcMs: number) => {
+    const name =
+      fmt.formatToParts(new Date(utcMs)).find((p) => p.type === "timeZoneName")?.value ?? "GMT-8";
+    return Number(name.replace("GMT", ""));
+  };
+
+  const HOUR = 3600000;
+  const localAsUtc = Date.UTC(y, m - 1, d, hh, mm);
+
+  const guess = offsetHoursAt(localAsUtc + 8 * HOUR);
+  const offset = offsetHoursAt(localAsUtc - guess * HOUR);
+
+  const sign = offset < 0 ? "-" : "+";
+  return `${sign}${String(Math.abs(offset)).padStart(2, "0")}:00`;
+}
 
 export default function Calendar() {
   const { data: session } = useSession();
@@ -74,8 +99,8 @@ export default function Calendar() {
 
     const event = {
       summary: eventTitle || "New Event",
-      start: { dateTime: `${clickedDate}T${startTime}-07:00` },
-      end: { dateTime: `${clickedDate}T${endTime}-07:00` },
+      start: { dateTime: `${clickedDate}T${startTime}${pacificOffset(clickedDate, startTime)}` },
+      end: { dateTime: `${clickedDate}T${endTime}${pacificOffset(clickedDate, endTime)}` },
       is_date_night: isDate,
     };
 
